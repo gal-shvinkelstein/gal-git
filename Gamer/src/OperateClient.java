@@ -5,15 +5,19 @@ public class OperateClient
 {
     public class Gamer
     {
-        public Gamer(int pass, int id)
+        public Gamer(int pass, int id, Set<Games> my_games)
         {
-
+            m_pass =pass;
+            m_id = id;
+            m_my_games = my_games;
+            curr_port = 9000;
         }
         public void Purchase(Games game)
         {
+            // payment logic ...
             m_my_games.add(game);
         }
-        public void JoinLobby(int port_num)
+        public void JoinLobby(int lobby_num)
         {
 
         }
@@ -44,12 +48,5 @@ public class OperateClient
         private Set<Games> m_my_games;
 
     }
-    public class MsgHeader
-    {
-        public int req_type;
-        public int req_len;
-        public int usr_Id;
-        public int game_id;
-        public CharBuffer buffer;
-    }
+
 }
