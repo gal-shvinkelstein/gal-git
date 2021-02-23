@@ -25,6 +25,10 @@ public class Reactor implements Runnable {
         queue.add(socketChannel);
     }
 
+    public void RemoveChannel(SocketChannel socketChannel) {
+        queue.remove(socketChannel);
+    }
+
     @Override
     public void run() {
 
@@ -52,7 +56,7 @@ public class Reactor implements Runnable {
                     SelectionKey key = keyIterator.next();
 
                     if (key.isReadable()) {
-                        // Read the channel
+                        // Read the channel, read handler
 
                     }
 

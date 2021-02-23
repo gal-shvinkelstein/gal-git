@@ -6,7 +6,7 @@ public class ClientData
     //general data
     public int password;
     public int id;
-    private Set<Games> my_games;
+    public Set<Games> my_games;
 
     //data for lobby server
     public int port;

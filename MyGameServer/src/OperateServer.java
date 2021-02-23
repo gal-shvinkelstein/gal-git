@@ -21,6 +21,15 @@ public class OperateServer
     private Selector selector;
     private int noOfReactors;
 
+    public HashMap<Integer, ClientData> GetClientList()
+    {
+        return m_client_list;
+    }
+    public void Remove_incorrect(SocketChannel socketChannel)
+    {
+        reactors[0].RemoveChannel(socketChannel);
+    }
+
     public OperateServer(String host, int port, int noOfWorkerThreads)
     {
         try {
@@ -70,7 +79,7 @@ public class OperateServer
 
                     ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
                     SocketChannel socket = serverSocket.accept();
-                    reactors[i % noOfReactors].addChannel(socket);
+                    reactors[i % noOfReactors].addChannel(socket); // change logic to dedicate reactor for each server type
                     i++;
 
                 }
