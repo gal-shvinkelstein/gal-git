@@ -5,13 +5,66 @@ public class OperateClient
 {
     public class Gamer
     {
-        public Gamer(int pass, int id, Set<Games> my_games)
+        public Gamer()
+        {
+//            m_pass =pass;
+//            m_id = id;
+//            m_my_games = my_games;
+            curr_port = 9000;
+
+            //connect to main server
+
+        }
+        public void Register(int pass, int id)
         {
             m_pass =pass;
             m_id = id;
-            m_my_games = my_games;
-            curr_port = 9000;
+            MsgHeader msg = null;
+            msg.req_type = ReqType.Register;
+            msg.usr_pass = m_pass;
+            msg.usr_Id = m_id;
+
+            // send msg to server
+            // received back confirmation
+
         }
+        public void LogIn(int pass, int id )
+        {
+            m_pass =pass;
+            m_id = id;
+            MsgHeader msg = null;
+            msg.req_type = ReqType.Login;
+            msg.usr_pass = m_pass;
+            msg.usr_Id = m_id;
+
+            // send msg to server
+            // received back confirmation + set of my games
+            // update my games
+        }
+
+        public void LogOut()
+        {
+            MsgHeader msg = null;
+            msg.req_type = ReqType.Logout;
+            msg.usr_pass = m_pass;
+            msg.usr_Id = m_id;
+
+            // send msg to server
+            // received back confirmation
+        }
+
+        public void CreateLobby()
+        {
+            MsgHeader msg = null;
+            msg.req_type = ReqType.CreateLobby;
+            msg.usr_pass = m_pass;
+            msg.usr_Id = m_id;
+
+            // send msg to server
+            // received back confirmation + lobby id and port
+            // update my games
+        }
+
         public void Purchase(Games game)
         {
             // payment logic ...
@@ -45,6 +98,7 @@ public class OperateClient
         private int m_id;
         private int m_pass;
         private int curr_port;
+        private int curr_lobby;
         private Set<Games> m_my_games;
 
     }
