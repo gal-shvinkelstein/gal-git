@@ -79,8 +79,8 @@ public class OperateServer
 
                     ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
                     SocketChannel socket = serverSocket.accept();
-                    reactors[i % noOfReactors].addChannel(socket); // change logic to dedicate reactor for each server type
-                    i++;
+                    reactors[0/*i % noOfReactors*/].addChannel(socket); // change logic to dedicate reactor for each server type
+                    //i++;
 
                 }
 
@@ -91,7 +91,7 @@ public class OperateServer
 
     public static void main(String[] args)
     {
-        OperateServer acceptor = new OperateServer("localhost", 9000, 4);
+        OperateServer acceptor = new OperateServer("localhost", 9000, 2);
         try {
             acceptor.start();
         } catch (IOException e) {
