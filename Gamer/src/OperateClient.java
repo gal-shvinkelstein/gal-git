@@ -10,125 +10,47 @@ public class OperateClient
     {
         //test interface to be replaced with formal UI
         Scanner scanner = new Scanner(System.in);
+        Gamer gamer = new Gamer();
+        while(true)
+        {
+            System.out.println("Enter choice :" + "\n" + "1 for Register / Login" + "\n" + "2 for join lobby" + "\n" +
+                    "3 for purchase / start / join a game" + "\n" + "4 for other");
+            int choice = scanner.nextInt();
+            int req = 0;
+            switch (choice)
+            {
+                case 1:
+                    System.out.println("Enter id and password (with space):");
+                    int id = scanner.nextInt();
+                    int pass = scanner.nextInt();
+                    gamer.SetIdAndPass(id,pass);
+                    System.out.println("Enter request : " + "\n" + "1 -> Register" + "\n" + "2 -> Login");
+                    req = scanner.nextInt();
+                    break;
+                case 2:
+                    System.out.println("Enter lobby num:");
+                    int num = scanner.nextInt();
+                    gamer.SetCurrLobby(num);
+                    req = 6;
+                    break;
+                case 3:
+                    System.out.println("Enter game name from list:");
+                    String curr = scanner.next();
+                    gamer.SetCurrGame(curr);
+                    System.out.println("Enter request : " + "\n" + "5 -> Purchase" + "\n" + "8 -> Start game" + "\n" + "9 -> Join game");
+                    req = scanner.nextInt();
+                    break;
+                case 4:
+                    System.out.println("Enter request : " + "\n" + "3 -> Logout" + "\n" + "4 -> Create lobby" + "\n" + "7 -> Leave lobby" +
+                             "\n" + "10 -> Leave game" + "\n" + "11 -> Restart game");
+                    req = scanner.nextInt();
+                    break;
 
+            }
+            gamer.m_commands.get(req);
+        }
 
     }
 
-    public class Gamer
-    {
-        public Gamer()
-        {
-
-            m_commands = new HashMap<>();
-            m_commands.put(1,() -> Register(this.m_pass,this.m_id));
-            m_commands.put(2,() -> LogIn(this.m_pass,this.m_id));
-            m_commands.put(3,() -> LogOut());
-            m_commands.put(4,() -> CreateLobby());
-            m_commands.put(5,() -> Purchase(this.curr_game));
-            m_commands.put(6,() -> JoinLobby(this.curr_lobby));
-            m_commands.put(7,() -> LeaveLobby());
-            m_commands.put(8,() -> StartGame(this.curr_game));
-            m_commands.put(9,() -> JoinGame(this.curr_game));
-            m_commands.put(10,() -> LeaveGame());
-            m_commands.put(11,() -> RestartGame());
-
-
-
-
-
-            curr_port = 9000;
-
-            //connect to main server
-
-        }
-        public void Register(int pass, int id)
-        {
-            m_pass =pass;
-            m_id = id;
-            MsgHeader msg = new MsgHeader();
-            msg.req_type = ReqType.Register;
-            msg.usr_pass = m_pass;
-            msg.usr_Id = m_id;
-
-            // send msg to server
-            // received back confirmation
-
-        }
-        public void LogIn(int pass, int id )
-        {
-            m_pass =pass;
-            m_id = id;
-            MsgHeader msg = new MsgHeader();
-            msg.req_type = ReqType.Login;
-            msg.usr_pass = m_pass;
-            msg.usr_Id = m_id;
-
-            // send msg to server
-            // received back confirmation + set of my games
-            // update my games
-        }
-
-        public void LogOut()
-        {
-            MsgHeader msg = new MsgHeader();
-            msg.req_type = ReqType.Logout;
-            msg.usr_pass = m_pass;
-            msg.usr_Id = m_id;
-
-            // send msg to server
-            // received back confirmation
-        }
-
-        public void CreateLobby()
-        {
-            MsgHeader msg = new MsgHeader();
-            msg.req_type = ReqType.CreateLobby;
-            msg.usr_pass = m_pass;
-            msg.usr_Id = m_id;
-
-            // send msg to server
-            // received back confirmation + lobby id and port
-            // update my games
-        }
-
-        public void Purchase(Games game)
-        {
-            // payment logic ...
-            m_my_games.add(game);
-        }
-        public void JoinLobby(int lobby_num)
-        {
-
-        }
-        public void LeaveLobby()
-        {
-
-        }
-        public void StartGame(Games game)
-        {
-
-        }
-        public void JoinGame(Games game)
-        {
-
-        }
-        public void LeaveGame()
-        {
-
-        }
-        public void RestartGame()
-        {
-
-        }
-
-        private int m_id;
-        private int m_pass;
-        private int curr_port;
-        private int curr_lobby;
-        private Games curr_game;
-        private Set<Games> m_my_games;
-        Map<Integer, Runnable> m_commands;
-
-    }
 
 }
