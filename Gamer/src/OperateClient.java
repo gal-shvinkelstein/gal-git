@@ -1,15 +1,41 @@
 import java.nio.CharBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 public class OperateClient
 {
+    public static void main(String[] args)
+    {
+        //test interface to be replaced with formal UI
+        Scanner scanner = new Scanner(System.in);
+
+
+    }
+
     public class Gamer
     {
         public Gamer()
         {
-//            m_pass =pass;
-//            m_id = id;
-//            m_my_games = my_games;
+
+            m_commands = new HashMap<>();
+            m_commands.put(1,() -> Register(this.m_pass,this.m_id));
+            m_commands.put(2,() -> LogIn(this.m_pass,this.m_id));
+            m_commands.put(3,() -> LogOut());
+            m_commands.put(4,() -> CreateLobby());
+            m_commands.put(5,() -> Purchase(this.curr_game));
+            m_commands.put(6,() -> JoinLobby(this.curr_lobby));
+            m_commands.put(7,() -> LeaveLobby());
+            m_commands.put(8,() -> StartGame(this.curr_game));
+            m_commands.put(9,() -> JoinGame(this.curr_game));
+            m_commands.put(10,() -> LeaveGame());
+            m_commands.put(11,() -> RestartGame());
+
+
+
+
+
             curr_port = 9000;
 
             //connect to main server
@@ -19,7 +45,7 @@ public class OperateClient
         {
             m_pass =pass;
             m_id = id;
-            MsgHeader msg = null;
+            MsgHeader msg = new MsgHeader();
             msg.req_type = ReqType.Register;
             msg.usr_pass = m_pass;
             msg.usr_Id = m_id;
@@ -32,7 +58,7 @@ public class OperateClient
         {
             m_pass =pass;
             m_id = id;
-            MsgHeader msg = null;
+            MsgHeader msg = new MsgHeader();
             msg.req_type = ReqType.Login;
             msg.usr_pass = m_pass;
             msg.usr_Id = m_id;
@@ -44,7 +70,7 @@ public class OperateClient
 
         public void LogOut()
         {
-            MsgHeader msg = null;
+            MsgHeader msg = new MsgHeader();
             msg.req_type = ReqType.Logout;
             msg.usr_pass = m_pass;
             msg.usr_Id = m_id;
@@ -55,7 +81,7 @@ public class OperateClient
 
         public void CreateLobby()
         {
-            MsgHeader msg = null;
+            MsgHeader msg = new MsgHeader();
             msg.req_type = ReqType.CreateLobby;
             msg.usr_pass = m_pass;
             msg.usr_Id = m_id;
@@ -99,7 +125,9 @@ public class OperateClient
         private int m_pass;
         private int curr_port;
         private int curr_lobby;
+        private Games curr_game;
         private Set<Games> m_my_games;
+        Map<Integer, Runnable> m_commands;
 
     }
 
