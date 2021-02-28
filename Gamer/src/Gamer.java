@@ -15,18 +15,14 @@ public class Gamer
         m_commands.put(1,() -> {
             try {
                 Register(this.m_pass,this.m_id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
         m_commands.put(2,() -> {
             try {
                 LogIn(this.m_pass,this.m_id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
