@@ -1,10 +1,8 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +12,24 @@ public class Gamer
     public Gamer() throws IOException {
         System.out.println("Gamer created");
         m_commands = new HashMap<>();
-        m_commands.put(1,() -> Register(this.m_pass,this.m_id));
-        m_commands.put(2,() -> LogIn(this.m_pass,this.m_id));
+        m_commands.put(1,() -> {
+            try {
+                Register(this.m_pass,this.m_id);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(2,() -> {
+            try {
+                LogIn(this.m_pass,this.m_id);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(3,() -> LogOut());
         m_commands.put(4,() -> CreateLobby());
         m_commands.put(5,() -> Purchase(this.curr_game));
@@ -33,15 +47,16 @@ public class Gamer
 
         try {
             m_s1 = new Socket(address, curr_port);
-            m_is=new BufferedReader(new InputStreamReader(m_s1.getInputStream()));
-            m_os= new PrintWriter(m_s1.getOutputStream());
+            m_os= new ObjectOutputStream(m_s1.getOutputStream());
+            m_is=new ObjectInputStream(new ObjectInputStream(m_s1.getInputStream()));
+
         }
         catch (IOException e){
             e.printStackTrace();
             System.err.print("IO Exception");
         }
 
-        System.out.println("Client Address : "+address);
+        System.out.println("Client connected at Address : "+address);
 
     }
     public void SetIdAndPass(int id, int pass)
@@ -57,8 +72,7 @@ public class Gamer
     {
         curr_game = Games.valueOf(game);
     }
-    public void Register(int pass, int id)
-    {
+    public void Register(int pass, int id) throws IOException, ClassNotFoundException {
         System.out.println("Sending register request " + "pass: " + pass + "id: " + id);
         m_pass =pass;
         m_id = id;
@@ -68,11 +82,13 @@ public class Gamer
         msg.usr_Id = m_id;
 
         // send msg to server
+        m_os.writeObject(msg);
         // received back confirmation
-
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+        System.out.println(ret.buffer.toString());
     }
-    public void LogIn(int pass, int id )
-    {
+    public void LogIn(int pass, int id ) throws IOException, ClassNotFoundException {
         System.out.println("Sending Login request");
         m_pass =pass;
         m_id = id;
@@ -82,8 +98,12 @@ public class Gamer
         msg.usr_Id = m_id;
 
         // send msg to server
+        m_os.writeObject(msg);
         // received back confirmation + set of my games
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
         // update my games
+        m_my_games = Collections.unmodifiableSet((Set<Games>) ret.buffer);
     }
 
     public void LogOut()
@@ -146,6 +166,9 @@ public class Gamer
     {
         System.out.println("Sending restart game request");
 
+    }
+    public void DisplayMyGames()
+    {
 
     }
 
@@ -158,7 +181,7 @@ public class Gamer
     public Map<Integer, Runnable> m_commands;
 
     private Socket m_s1;
-    private BufferedReader m_is;
-    private PrintWriter m_os;
+    private ObjectInputStream m_is;
+    private ObjectOutputStream m_os;
 
 }
