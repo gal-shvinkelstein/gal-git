@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -6,8 +7,7 @@ import java.util.Set;
 
 public class OperateClient
 {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws IOException {
         //test interface to be replaced with formal UI
         Scanner scanner = new Scanner(System.in);
         Gamer gamer = new Gamer();
@@ -47,7 +47,7 @@ public class OperateClient
                     break;
 
             }
-            gamer.m_commands.get(req);
+            gamer.m_commands.get(req).run();
         }
 
     }

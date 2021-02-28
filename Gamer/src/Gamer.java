@@ -1,12 +1,18 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class Gamer
 {
-    public Gamer()
-    {
-
+    public Gamer() throws IOException {
+        System.out.println("Gamer created");
         m_commands = new HashMap<>();
         m_commands.put(1,() -> Register(this.m_pass,this.m_id));
         m_commands.put(2,() -> LogIn(this.m_pass,this.m_id));
@@ -20,13 +26,22 @@ public class Gamer
         m_commands.put(10,() -> LeaveGame());
         m_commands.put(11,() -> RestartGame());
 
-
-
-
-
         curr_port = 9000;
 
         //connect to main server
+        InetAddress address=InetAddress.getLocalHost(); // server address?
+
+        try {
+            m_s1 = new Socket(address, curr_port);
+            m_is=new BufferedReader(new InputStreamReader(m_s1.getInputStream()));
+            m_os= new PrintWriter(m_s1.getOutputStream());
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            System.err.print("IO Exception");
+        }
+
+        System.out.println("Client Address : "+address);
 
     }
     public void SetIdAndPass(int id, int pass)
@@ -44,7 +59,7 @@ public class Gamer
     }
     public void Register(int pass, int id)
     {
-        System.out.println("Sending register request");
+        System.out.println("Sending register request " + "pass: " + pass + "id: " + id);
         m_pass =pass;
         m_id = id;
         MsgHeader msg = new MsgHeader();
@@ -141,5 +156,9 @@ public class Gamer
     private Games curr_game;
     private Set<Games> m_my_games;
     public Map<Integer, Runnable> m_commands;
+
+    private Socket m_s1;
+    private BufferedReader m_is;
+    private PrintWriter m_os;
 
 }
