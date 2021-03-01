@@ -2,14 +2,16 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class Gamer
 {
-    public Gamer() throws IOException {
+    //private BitSet ByteStreams;
+
+    public Gamer() throws UnknownHostException {
+        //ByteStreams = new BitSet();
+
         System.out.println("Gamer created");
         m_commands = new HashMap<>();
         m_commands.put(1,() -> {
@@ -26,9 +28,21 @@ public class Gamer
                 e.printStackTrace();
             }
         });
-        m_commands.put(3,() -> LogOut());
+        m_commands.put(3,() -> {
+            try {
+                LogOut();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(4,() -> CreateLobby());
-        m_commands.put(5,() -> Purchase(this.curr_game));
+        m_commands.put(5,() -> {
+            try {
+                Purchase(this.curr_game);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(6,() -> JoinLobby(this.curr_lobby));
         m_commands.put(7,() -> LeaveLobby());
         m_commands.put(8,() -> StartGame(this.curr_game));
@@ -61,6 +75,7 @@ public class Gamer
         m_pass = pass;
     }
     public void SetCurrLobby(int num)
+
     {
         curr_lobby = num;
     }
@@ -68,7 +83,9 @@ public class Gamer
     {
         curr_game = Games.valueOf(game);
     }
-    public void Register(int pass, int id) throws IOException, ClassNotFoundException {
+
+    public void Register(int pass, int id) throws IOException, ClassNotFoundException
+    {
         System.out.println("Sending register request " + "pass: " + pass + "id: " + id);
         m_pass =pass;
         m_id = id;
@@ -82,7 +99,7 @@ public class Gamer
         // received back confirmation
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
-        System.out.println(ret.buffer.toString());
+        System.out.println(ret.buffer);
     }
     public void LogIn(int pass, int id ) throws IOException, ClassNotFoundException {
         System.out.println("Sending Login request");
@@ -99,11 +116,11 @@ public class Gamer
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
         // update my games
-        m_my_games = Collections.unmodifiableSet((Set<Games>) ret.buffer);
+        m_my_games = (Set<Games>) ret.buffer;
+
     }
 
-    public void LogOut()
-    {
+    public void LogOut() throws IOException, ClassNotFoundException {
         System.out.println("Sending Logout request");
         MsgHeader msg = new MsgHeader();
         msg.req_type = ReqType.Logout;
@@ -111,7 +128,11 @@ public class Gamer
         msg.usr_Id = m_id;
 
         // send msg to server
+        m_os.writeObject(msg);
         // received back confirmation
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+        System.out.println(ret.buffer);
     }
 
     public void CreateLobby()
@@ -127,11 +148,23 @@ public class Gamer
         // update my games
     }
 
-    public void Purchase(Games game)
-    {
+    public void Purchase(Games game) throws IOException, ClassNotFoundException {
         System.out.println("Sending purchase request");
+
         // payment logic ...
+
         m_my_games.add(game);
+        MsgHeader msg = new MsgHeader();
+        msg.req_type = ReqType.Purchase;
+        msg.buffer = game;
+
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+        System.out.println(ret.buffer);
+
+
     }
     public void JoinLobby(int lobby_num)
     {
@@ -165,7 +198,7 @@ public class Gamer
     }
     public void DisplayMyGames()
     {
-
+        System.out.println(m_my_games);
     }
 
     private int m_id;
