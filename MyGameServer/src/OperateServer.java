@@ -1,104 +1,61 @@
 import java.net.ServerSocket;
-import java.nio.CharBuffer;
+import java.net.Socket;
 import java.util.HashMap;
-import java.util.function.Function;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
 
 public class OperateServer
 {
     private HashMap<Integer, ClientData> m_client_list;
 
-    private ServerSocketChannel serverSocketChannel;
-    private Reactor[] reactors;
-
-    private Selector selector;
-    private int noOfReactors;
-
     public HashMap<Integer, ClientData> GetClientList()
     {
         return m_client_list;
     }
-    public void Remove_incorrect(SocketChannel socketChannel)
-    {
-        reactors[0].RemoveChannel(socketChannel);
-    }
 
-    public OperateServer(String host, int port, int noOfWorkerThreads)
-    {
-        try {
-            selector = Selector.open();
-            reactors = new Reactor[noOfWorkerThreads];
-            this.noOfReactors = noOfWorkerThreads;
-            for (int i = 0; i < noOfWorkerThreads; i++) {
-                reactors[i] = new Reactor();
-                Thread thread = new Thread(reactors[i]);
-                thread.start();
-            }
 
-            serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.bind(new InetSocketAddress(host, 9000));
-            serverSocketChannel.configureBlocking(false);
-
-            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-        } catch (IOException e) {
-            //handle exceptions
-        }
-    }
-
-    public void start() throws IOException
-    {
-
-        int i = 0;
-
-        while (true)
-        {
-
-            int readyChannels = selector.select();
-            if (readyChannels == 0)
-                continue;
-
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-
-            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-
-            while (keyIterator.hasNext())
-            {
-
-                SelectionKey key = keyIterator.next();
-
-                if (key.isAcceptable())
-                {
-
-                    ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
-                    SocketChannel socket = serverSocket.accept();
-                    reactors[0/*i % noOfReactors*/].addChannel(socket); // change logic to dedicate reactor for each server type
-                    //i++;
-
-                }
-
-                keyIterator.remove();
-            }
-        }
+    public OperateServer(String host, int port) {
     }
 
     public static void main(String[] args)
     {
-        OperateServer acceptor = new OperateServer("localhost", 9000, 2);
-        try {
-            acceptor.start();
-        } catch (IOException e) {
-            // e.printStackTrace();
+        Socket s = null;
+        ServerSocket login = null;
+        //ServerSocket lobby = null;
+        System.out.println("Server Listening......");
+        try
+        {
+            login = new ServerSocket(9000); // can also use static final PORT_NUM , when defined
+            //lobby = new ServerSocket(9001);
         }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Server error");
+
+        }
+
+        while(true)
+        {
+            try
+            {
+                s= login.accept();
+                System.out.println("connection Established");
+                ServerThread st=new ServerThread(s);
+                st.start();
+            }
+
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                System.out.println("Connection Error");
+
+            }
+        }
+
     }
+
 }
+
 
 
 

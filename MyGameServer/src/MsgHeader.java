@@ -5,5 +5,5 @@ public class MsgHeader {
     public int usr_Id;
     public int usr_pass;
     public int game_id;
-    public CharBuffer buffer;
+    public Object buffer;
 }

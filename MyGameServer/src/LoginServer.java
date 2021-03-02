@@ -9,7 +9,7 @@ public class LoginServer
 
     public void RegisterNewGamer(int id,int pass, OperateServer server)
     {
-        ClientData new_gamer = null;
+        ClientData new_gamer = new ClientData();
         new_gamer.id = id;
         new_gamer.password = pass;
         new_gamer.my_games.add(Games.XCircle);
@@ -25,23 +25,21 @@ public class LoginServer
         if(log_c == null)
         {
            //send msg incorrect id, fixed or register
-            server.Remove_incorrect(socketChannel);
         }
         else if(log_c.password != pass)
         {
             //send msg incorrect pass, fixed or register
-            server.Remove_incorrect(socketChannel);
         }
         else
         {
             //send msg login succeed
-            //run Gamer
+            //copy games
         }
     }
 
     public void LogOut(OperateServer server, SocketChannel socketChannel)
     {
-        server.Remove_incorrect(socketChannel);
+        server.Remove_gamer(socketChannel);
     }
 
     public int CreateLobby (ClientData opener)
