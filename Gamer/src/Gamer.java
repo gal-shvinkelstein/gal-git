@@ -156,7 +156,7 @@ public class Gamer
         m_my_games.add(game);
         MsgHeader msg = new MsgHeader();
         msg.req_type = ReqType.Purchase;
-        msg.buffer = new Gamer();
+//        msg.buffer = new Games();
         msg.buffer = game;
 
         m_os.writeObject(msg);
