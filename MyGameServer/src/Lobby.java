@@ -2,7 +2,7 @@ import java.util.HashMap;
 
 public class Lobby
 {
-    public Lobby()
+    public Lobby(ClientData opener)
     {
 
     }

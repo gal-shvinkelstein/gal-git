@@ -6,29 +6,32 @@ import java.net.Socket;
 public class ServerThread extends Thread {
     private ObjectInputStream m_is;
     private ObjectOutputStream m_os;
-    Socket m_s = null;
+    private Socket m_s = null;
+    private Dispatcher m_disp;
 
-    public ServerThread(Socket s){
+    public ServerThread(Socket s, OperateServer server)
+    {
         this.m_s = s;
+        try{
+            m_os= new ObjectOutputStream(m_s.getOutputStream());
+            m_is=new ObjectInputStream(new ObjectInputStream(m_s.getInputStream()));
+
+        }catch(IOException e){
+            System.out.println("IO error in server thread");
+        }
+
+        m_disp = new Dispatcher(m_os, server);
     }
 
     public void run()
     {
-    try{
-        m_os= new ObjectOutputStream(m_s.getOutputStream());
-        m_is=new ObjectInputStream(new ObjectInputStream(m_s.getInputStream()));
-
-    }catch(IOException e){
-        System.out.println("IO error in server thread");
-    }
 
     try {
         while(m_s.isConnected())
         {
             MsgHeader msg = new MsgHeader();
             msg = (MsgHeader) m_is.readObject();
-            //call dispatcher handler with massage
-
+            m_disp.RequestHandler(msg);
         }
     } catch (IOException e) {
 

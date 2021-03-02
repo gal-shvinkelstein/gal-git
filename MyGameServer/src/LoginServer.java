@@ -2,31 +2,31 @@ import java.nio.channels.SocketChannel;
 
 public class LoginServer
 {
-    public LoginServer()
+    public LoginServer(OperateServer server)
     {
-
+        m_server = server;
     }
 
-    public void RegisterNewGamer(int id,int pass, OperateServer server)
+    public void RegisterNewGamer(MsgHeader msg)
     {
         ClientData new_gamer = new ClientData();
-        new_gamer.id = id;
-        new_gamer.password = pass;
+        new_gamer.id = msg.usr_Id;
+        new_gamer.password = msg.usr_pass;
         new_gamer.my_games.add(Games.XCircle);
         // add all free games
         new_gamer.port = 9000;
 
-        server.GetClientList().put(new_gamer.id,new_gamer);
+        m_server.GetClientList().put(new_gamer.id,new_gamer);
     }
 
-    public void LogIn(int id, int pass, OperateServer server, SocketChannel socketChannel)
+    public void LogIn(MsgHeader msg)
     {
-        ClientData log_c = server.GetClientList().get(id);
+        ClientData log_c = m_server.GetClientList().get(msg.usr_Id);
         if(log_c == null)
         {
            //send msg incorrect id, fixed or register
         }
-        else if(log_c.password != pass)
+        else if(log_c.password != msg.usr_pass)
         {
             //send msg incorrect pass, fixed or register
         }
@@ -37,18 +37,18 @@ public class LoginServer
         }
     }
 
-    public void LogOut(OperateServer server, SocketChannel socketChannel)
+    public void LogOut()
     {
-        server.Remove_gamer(socketChannel);
+        //server.Remove_gamer(socketChannel);
     }
 
-    public int CreateLobby (ClientData opener)
-    {
-        ++m_lobby_id;
-        //open new lobby
 
-        return (m_lobby_id);
+    public void Purchase(MsgHeader msg)
+    {
+        Games new_game = (Games) msg.buffer;
+        m_server.GetClientList().get(msg.usr_Id).my_games.add(new_game);
     }
 
-    private static int m_lobby_id;
+
+    public OperateServer m_server;
 }
