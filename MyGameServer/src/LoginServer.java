@@ -9,16 +9,22 @@ public class LoginServer
 
     public void RegisterNewGamer(MsgHeader msg)
     {
+        System.out.println("in register new gamer1");
         ClientData new_gamer = new ClientData();
         new_gamer.id = msg.usr_Id;
         new_gamer.password = msg.usr_pass;
         new_gamer.my_games.add(Games.XCircle);
         // add all free games
+
         new_gamer.port = 9000;
 
-        OperateServer.GetClientList().put(new_gamer.id,new_gamer);
+        System.out.println("trying to write new gamer in list");
+//        OperateServer.GetClientList().put(new_gamer.id,new_gamer);
+        OperateServer.AddClient(new_gamer);
+        System.out.println("gamer written");
         MsgHeader ret = new MsgHeader();
         ret.buffer = "registration succeed";
+        System.out.println("trying to set buff " + ret.buffer);
         m_disp.SetCurrMsg(ret);
 
     }

@@ -19,7 +19,7 @@ public class ServerThread extends Thread {
     {
         try{
             m_os= new ObjectOutputStream(m_s.getOutputStream());
-            m_is=new ObjectInputStream(new ObjectInputStream(m_s.getInputStream()));
+            m_is=new ObjectInputStream(m_s.getInputStream());
 
         }catch(IOException e){
             System.out.println("IO error in server thread");

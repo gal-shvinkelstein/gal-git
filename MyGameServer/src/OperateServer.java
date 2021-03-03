@@ -2,20 +2,28 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.io.IOException;
+import java.util.Map;
 
 public class OperateServer
 {
+    public class AllClients {
+        private Map<Integer, ClientData> m_client_list;
 
-    private static HashMap<Integer,ClientData> m_client_list;
+        public Map<Integer, ClientData> GetClientList() {
+            return m_client_list;
+        }
 
-    public static HashMap<Integer, ClientData> GetClientList()
-    {
-        return m_client_list;
+        public void AddClient(ClientData cd) {
+            System.out.println("trying to write new gamer in add func");
+
+            m_client_list.put(cd.id, cd);
+            System.out.println("ok");
+        }
+
+        public AllClients() {
+            m_client_list = new HashMap<>();
+        }
     }
-    public OperateServer() {
-        m_client_list = new HashMap<>();
-    }
-
     public static void main(String[] args)
     {
         Socket s = null;

@@ -1,12 +1,18 @@
 import java.net.Socket;
+import java.util.EnumSet;
 import java.util.Set;
 
 public class ClientData
 {
+    ClientData()
+    {
+        my_games = EnumSet.noneOf(Games.class);
+    }
+
     //general data
     public int password;
     public int id;
-    public Set<Games> my_games;
+    public EnumSet<Games> my_games;
 
     //data for lobby server
     public int port;

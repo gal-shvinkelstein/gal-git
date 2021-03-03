@@ -14,6 +14,7 @@ public class Dispatcher
         m_os = os;
         m_log_req = new LoginServer(this);
         m_commands = new HashMap<>();
+        m_curr_msg = new MsgHeader();
 
         m_commands.put(ReqType.connection, () -> {
             try {
@@ -28,7 +29,7 @@ public class Dispatcher
         m_commands.put(ReqType.Purchase, () -> m_log_req.Purchase(this.m_curr_msg));
         m_commands.put(ReqType.CreateLobby, () -> {
             try {
-                CreateLobby(OperateServer.GetClientList().get(this.m_curr_msg.usr_Id));
+                CreateLobby(OperateServer.AllClients.GetClientList().get(this.m_curr_msg.usr_Id));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -61,12 +62,15 @@ public class Dispatcher
 
     public void ReplayHandler(MsgHeader msg) throws IOException
     {
+//        MsgHeader to_send;
+//        to_send = msg;
         m_os.writeObject(msg);
     }
     public void SetCurrMsg(MsgHeader msg)
     {
-        m_curr_msg = new MsgHeader();
+        System.out.println("in set curr massage");
         m_curr_msg = msg;
+        System.out.println("curr buff " + msg.buffer);
     }
     private MsgHeader m_curr_msg;
     private final ObjectOutputStream m_os;
