@@ -11,7 +11,7 @@ public class Gamer
 
     public Gamer() throws UnknownHostException {
         //ByteStreams = new BitSet();
-
+        m_my_games = EnumSet.noneOf(Games.class);
         System.out.println("Gamer created");
         m_commands = new HashMap<>();
         m_commands.put(1,() -> {
@@ -120,7 +120,7 @@ public class Gamer
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
         // update my games
-        m_my_games = (Set<Games>) ret.buffer;
+        m_my_games = (EnumSet<Games>) ret.buffer;
 
     }
 
@@ -211,7 +211,7 @@ public class Gamer
     private int curr_port;
     private int curr_lobby;
     private Games curr_game;
-    private Set<Games> m_my_games;
+    private EnumSet<Games> m_my_games;
     public Map<Integer, Runnable> m_commands;
 
     private Socket m_s1;
