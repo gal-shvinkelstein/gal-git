@@ -61,7 +61,7 @@ public class Gamer
             MsgHeader msgHeader = new MsgHeader();
             msgHeader.req_type = ReqType.connection;
             m_os.writeObject(msgHeader);
-            m_is=new ObjectInputStream(new ObjectInputStream(m_s1.getInputStream()));
+            m_is=new ObjectInputStream(m_s1.getInputStream());
             MsgHeader ret = (MsgHeader) m_is.readObject();
             System.out.println(ret.buffer);
         }

@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-public class MsgHeader {
+public class MsgHeader implements Serializable {
     public ReqType req_type;
     public int usr_Id;
     public int usr_pass;
