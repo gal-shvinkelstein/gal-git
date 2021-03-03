@@ -1,4 +1,5 @@
 public enum ReqType {
+    connection,
     Register,
     Login,
     Logout,

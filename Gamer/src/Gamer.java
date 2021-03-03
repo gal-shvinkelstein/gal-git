@@ -58,10 +58,14 @@ public class Gamer
         try {
             m_s1 = new Socket(address, curr_port);
             m_os= new ObjectOutputStream(m_s1.getOutputStream());
+            MsgHeader msgHeader = new MsgHeader();
+            msgHeader.req_type = ReqType.connection;
+            m_os.writeObject(msgHeader);
             m_is=new ObjectInputStream(new ObjectInputStream(m_s1.getInputStream()));
-
+            MsgHeader ret = (MsgHeader) m_is.readObject();
+            System.out.println(ret.buffer);
         }
-        catch (IOException e){
+        catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
             System.err.print("IO Exception");
         }
