@@ -5,15 +5,15 @@ import java.io.IOException;
 
 public class OperateServer
 {
-    private HashMap<Integer, ClientData> m_client_list;
 
-    public HashMap<Integer, ClientData> GetClientList()
+    private static HashMap<Integer,ClientData> m_client_list;
+
+    public static HashMap<Integer, ClientData> GetClientList()
     {
         return m_client_list;
     }
-
-
-    public OperateServer(String host, int port) {
+    public OperateServer() {
+        m_client_list = new HashMap<>();
     }
 
     public static void main(String[] args)
@@ -54,6 +54,9 @@ public class OperateServer
 
     }
 
+//    public static void setM_client_list(HashMap<Integer, ClientData> m_client_list) {
+//        OperateServer.m_client_list = m_client_list;
+//    }
 }
 
 

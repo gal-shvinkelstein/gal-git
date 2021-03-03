@@ -9,18 +9,19 @@ import java.util.Map;
 
 public class Dispatcher
 {
-    public Dispatcher(ObjectOutputStream os, OperateServer server)
+    public Dispatcher(ObjectOutputStream os)
     {
         m_os = os;
-        m_log_req = new LoginServer(server);
+        m_log_req = new LoginServer();
         m_commands = new HashMap<>();
 
         m_commands.put(ReqType.Register,() -> m_log_req.RegisterNewGamer(this.m_curr_msg));
         m_commands.put(ReqType.Login, () -> m_log_req.LogIn(this.m_curr_msg));
         m_commands.put(ReqType.Logout, () -> m_log_req.LogOut());
         m_commands.put(ReqType.Purchase, () -> m_log_req.Purchase(this.m_curr_msg));
-        m_commands.put(ReqType.CreateLobby, () -> CreateLobby(server.GetClientList().get(this.m_curr_msg.usr_Id)));
+        m_commands.put(ReqType.CreateLobby, () -> CreateLobby(OperateServer.GetClientList().get(this.m_curr_msg.usr_Id)));
         //m_commands.put();
+
     }
 
     public void CreateLobby (ClientData opener)

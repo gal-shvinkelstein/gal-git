@@ -9,7 +9,7 @@ public class ServerThread extends Thread {
     private Socket m_s = null;
     private Dispatcher m_disp;
 
-    public ServerThread(Socket s, OperateServer server)
+    public ServerThread(Socket s)
     {
         this.m_s = s;
         try{
@@ -20,7 +20,7 @@ public class ServerThread extends Thread {
             System.out.println("IO error in server thread");
         }
 
-        m_disp = new Dispatcher(m_os, server);
+        m_disp = new Dispatcher(m_os);
     }
 
     public void run()

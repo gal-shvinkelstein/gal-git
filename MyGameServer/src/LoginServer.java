@@ -2,9 +2,9 @@ import java.nio.channels.SocketChannel;
 
 public class LoginServer
 {
-    public LoginServer(OperateServer server)
+    public LoginServer()
     {
-        m_server = server;
+
     }
 
     public void RegisterNewGamer(MsgHeader msg)
@@ -16,12 +16,12 @@ public class LoginServer
         // add all free games
         new_gamer.port = 9000;
 
-        m_server.GetClientList().put(new_gamer.id,new_gamer);
+        OperateServer.GetClientList().put(new_gamer.id,new_gamer);
     }
 
     public void LogIn(MsgHeader msg)
     {
-        ClientData log_c = m_server.GetClientList().get(msg.usr_Id);
+        ClientData log_c = OperateServer.GetClientList().get(msg.usr_Id);
         if(log_c == null)
         {
            //send msg incorrect id, fixed or register
@@ -46,9 +46,7 @@ public class LoginServer
     public void Purchase(MsgHeader msg)
     {
         Games new_game = (Games) msg.buffer;
-        m_server.GetClientList().get(msg.usr_Id).my_games.add(new_game);
+        OperateServer.GetClientList().get(msg.usr_Id).my_games.add(new_game);
     }
 
-
-    public OperateServer m_server;
 }
