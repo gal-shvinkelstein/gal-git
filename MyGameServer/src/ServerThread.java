@@ -4,14 +4,19 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
-    private ObjectInputStream m_is;
     private ObjectOutputStream m_os;
+    private ObjectInputStream m_is;
     private Socket m_s = null;
     private Dispatcher m_disp;
 
     public ServerThread(Socket s)
     {
         this.m_s = s;
+
+    }
+
+    public void run()
+    {
         try{
             m_os= new ObjectOutputStream(m_s.getOutputStream());
             m_is=new ObjectInputStream(new ObjectInputStream(m_s.getInputStream()));
@@ -21,15 +26,10 @@ public class ServerThread extends Thread {
         }
 
         m_disp = new Dispatcher(m_os);
-    }
-
-    public void run()
-    {
-
     try {
         while(m_s.isConnected())
         {
-            MsgHeader msg = new MsgHeader();
+            MsgHeader msg;
             msg = (MsgHeader) m_is.readObject();
             m_disp.RequestHandler(msg);
         }

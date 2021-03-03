@@ -2,9 +2,9 @@ import java.nio.channels.SocketChannel;
 
 public class LoginServer
 {
-    public LoginServer()
+    public LoginServer(Dispatcher disp)
     {
-
+        m_disp = disp;
     }
 
     public void RegisterNewGamer(MsgHeader msg)
@@ -17,11 +17,16 @@ public class LoginServer
         new_gamer.port = 9000;
 
         OperateServer.GetClientList().put(new_gamer.id,new_gamer);
+        MsgHeader ret = new MsgHeader();
+        ret.buffer = "registration succeed";
+        m_disp.SetCurrMsg(ret);
+
     }
 
     public void LogIn(MsgHeader msg)
     {
         ClientData log_c = OperateServer.GetClientList().get(msg.usr_Id);
+        MsgHeader ret = new MsgHeader();
         if(log_c == null)
         {
            //send msg incorrect id, fixed or register
@@ -35,18 +40,28 @@ public class LoginServer
             //send msg login succeed
             //copy games
         }
+        m_disp.SetCurrMsg(ret);
     }
 
     public void LogOut()
     {
+        MsgHeader ret = new MsgHeader();
+        ret.buffer = "logout";
         //server.Remove_gamer(socketChannel);
+        m_disp.SetCurrMsg(ret);
     }
 
 
     public void Purchase(MsgHeader msg)
     {
+        MsgHeader ret = new MsgHeader();
         Games new_game = (Games) msg.buffer;
         OperateServer.GetClientList().get(msg.usr_Id).my_games.add(new_game);
+
+        ret.buffer = "game added";
+        m_disp.SetCurrMsg(ret);
     }
+
+    Dispatcher m_disp;
 
 }
