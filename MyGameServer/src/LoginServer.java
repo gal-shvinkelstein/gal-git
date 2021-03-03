@@ -20,7 +20,7 @@ public class LoginServer
 
         System.out.println("trying to write new gamer in list");
 //        OperateServer.GetClientList().put(new_gamer.id,new_gamer);
-        OperateServer.AddClient(new_gamer);
+        m_disp.m_client_data.AddClient(new_gamer);
         System.out.println("gamer written");
         MsgHeader ret = new MsgHeader();
         ret.buffer = "registration succeed";
@@ -31,20 +31,21 @@ public class LoginServer
 
     public void LogIn(MsgHeader msg)
     {
-        ClientData log_c = OperateServer.GetClientList().get(msg.usr_Id);
+        ClientData log_c = m_disp.m_client_data.GetClientList().get(msg.usr_Id);
         MsgHeader ret = new MsgHeader();
         if(log_c == null)
         {
-           //send msg incorrect id, fixed or register
+           ret.buffer = "wrong id";
         }
         else if(log_c.password != msg.usr_pass)
         {
-            //send msg incorrect pass, fixed or register
+            ret.buffer = "wrong pass";
         }
         else
         {
             //send msg login succeed
             //copy games
+            ret.buffer = m_disp.m_client_data.GetClientList().get(log_c.id).my_games;
         }
         m_disp.SetCurrMsg(ret);
     }
@@ -62,7 +63,7 @@ public class LoginServer
     {
         MsgHeader ret = new MsgHeader();
         Games new_game = (Games) msg.buffer;
-        OperateServer.GetClientList().get(msg.usr_Id).my_games.add(new_game);
+        m_disp.m_client_data.GetClientList().get(msg.usr_Id).my_games.add(new_game);
 
         ret.buffer = "game added";
         m_disp.SetCurrMsg(ret);

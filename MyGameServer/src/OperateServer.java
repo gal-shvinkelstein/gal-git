@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class OperateServer
 {
-    public class AllClients {
+    public static class AllClients {
         private Map<Integer, ClientData> m_client_list;
 
         public Map<Integer, ClientData> GetClientList() {
@@ -30,6 +30,7 @@ public class OperateServer
         ServerSocket login = null;
         //ServerSocket lobby = null;
         System.out.println("Server Listening......");
+        AllClients clients_data = new AllClients();
         try
         {
             login = new ServerSocket(9000); // can also use static final PORT_NUM , when defined
@@ -48,7 +49,7 @@ public class OperateServer
             {
                 s= login.accept();
                 System.out.println("connection Established");
-                ServerThread st=new ServerThread(s);
+                ServerThread st=new ServerThread(s, clients_data);
                 st.start();
             }
 

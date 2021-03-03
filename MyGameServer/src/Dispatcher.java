@@ -9,12 +9,13 @@ import java.util.Map;
 
 public class Dispatcher
 {
-    public Dispatcher(ObjectOutputStream os)
+    public Dispatcher(ObjectOutputStream os, OperateServer.AllClients clients_data)
     {
         m_os = os;
         m_log_req = new LoginServer(this);
         m_commands = new HashMap<>();
         m_curr_msg = new MsgHeader();
+        m_client_data = clients_data;
 
         m_commands.put(ReqType.connection, () -> {
             try {
@@ -29,7 +30,7 @@ public class Dispatcher
         m_commands.put(ReqType.Purchase, () -> m_log_req.Purchase(this.m_curr_msg));
         m_commands.put(ReqType.CreateLobby, () -> {
             try {
-                CreateLobby(OperateServer.AllClients.GetClientList().get(this.m_curr_msg.usr_Id));
+                CreateLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -78,4 +79,5 @@ public class Dispatcher
     private HashMap<Integer,Lobby> m_lob_list;
     public Map<ReqType, Runnable> m_commands;
     private static int m_lobby_id;
+    OperateServer.AllClients m_client_data;
 }

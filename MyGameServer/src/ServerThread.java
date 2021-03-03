@@ -8,11 +8,12 @@ public class ServerThread extends Thread {
     private ObjectInputStream m_is;
     private Socket m_s = null;
     private Dispatcher m_disp;
+    OperateServer.AllClients m_clients_data;
 
-    public ServerThread(Socket s)
+    public ServerThread(Socket s, OperateServer.AllClients data)
     {
         this.m_s = s;
-
+        m_clients_data = data;
     }
 
     public void run()
@@ -25,7 +26,7 @@ public class ServerThread extends Thread {
             System.out.println("IO error in server thread");
         }
 
-        m_disp = new Dispatcher(m_os);
+        m_disp = new Dispatcher(m_os, m_clients_data);
     try {
         while(m_s.isConnected())
         {
