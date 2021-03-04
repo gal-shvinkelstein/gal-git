@@ -69,7 +69,7 @@ public class LoginServer
             Games new_game = (Games) msg.buffer;
             m_disp.m_client_data.GetClientList().get(msg.usr_Id).my_games.add(new_game);
 
-            System.out.println("After last purchase client games list: " + log_c.my_games);
+            System.out.println("After last purchase for client id: " + log_c.id + " games list: " + log_c.my_games);
             ret.buffer = "game added";
 
         }
