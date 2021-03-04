@@ -17,13 +17,11 @@ public class LoginServer
         // add all free games
 
         new_gamer.port = 9000;
-
-//        OperateServer.GetClientList().put(new_gamer.id,new_gamer);
         m_disp.m_client_data.AddClient(new_gamer);
         System.out.println("gamer written");
         MsgHeader ret = new MsgHeader();
         ret.buffer = "registration succeed";
-        System.out.println("trying to set buff " + ret.buffer);
+
         m_disp.ReplayHandler(ret);
 
     }
@@ -35,7 +33,6 @@ public class LoginServer
         {
            ret.buffer = "wrong id";
            ret.login_status = false;
-           log_c.log_status = false;
         }
         else if(log_c.password != msg.usr_pass)
         {
@@ -48,7 +45,7 @@ public class LoginServer
             //send msg login succeed
             //copy games
             ret.login_status = true;
-            ret.buffer = m_disp.m_client_data.GetClientList().get(log_c.id).my_games;
+            ret.buffer = log_c.my_games;
             log_c.log_status = true;
         }
         m_disp.ReplayHandler(ret);
@@ -59,7 +56,7 @@ public class LoginServer
         log_c.log_status = false;
         MsgHeader ret = new MsgHeader();
         ret.buffer = "logout";
-        //server.Remove_gamer(socketChannel);
+
         m_disp.ReplayHandler(ret);
     }
 
@@ -67,17 +64,17 @@ public class LoginServer
     public void Purchase(MsgHeader msg) throws IOException {
         ClientData log_c = m_disp.m_client_data.GetClientList().get(msg.usr_Id);
         MsgHeader ret = new MsgHeader();
-        System.out.println("in purchase request");
+        System.out.println("in purchase request, log status: " + log_c.log_status);
         if(log_c.log_status) {
-
             Games new_game = (Games) msg.buffer;
             m_disp.m_client_data.GetClientList().get(msg.usr_Id).my_games.add(new_game);
 
-            System.out.println("After last purchase client games list: " + m_disp.m_client_data.GetClientList().get(msg.usr_Id).my_games);
+            System.out.println("After last purchase client games list: " + log_c.my_games);
             ret.buffer = "game added";
 
         }
         else{
+            System.out.println("client doesn't logged in");
             ret.buffer = "you should login first";
         }
         m_disp.ReplayHandler(ret);
