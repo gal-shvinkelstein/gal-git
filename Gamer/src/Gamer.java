@@ -36,7 +36,13 @@ public class Gamer
                 e.printStackTrace();
             }
         });
-        m_commands.put(4,() -> CreateLobby());
+        m_commands.put(4,() -> {
+            try {
+                CreateLobby();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(5,() -> {
             try {
                 Purchase(this.curr_game);
@@ -146,17 +152,19 @@ public class Gamer
         System.out.println(ret.buffer);
     }
 
-    public void CreateLobby()
-    {
+    public void CreateLobby() throws IOException, ClassNotFoundException {
         System.out.println("Sending Create lobby request");
         MsgHeader msg = new MsgHeader();
         msg.req_type = ReqType.CreateLobby;
         msg.usr_pass = m_pass;
         msg.usr_Id = m_id;
 
-        // send msg to server
-        // received back confirmation + lobby id and port
-        // update my games
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+        curr_lobby = ret.lobby_id;
+        System.out.println("your lobby num is: " + curr_lobby + " go tell your friends");
     }
 
     public void Purchase(Games game) throws IOException, ClassNotFoundException {
