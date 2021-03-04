@@ -4,7 +4,8 @@ public class Lobby
 {
     public Lobby(ClientData opener)
     {
-
+        m_active_players = new HashMap<>();
+        m_active_players.put(opener.id,opener);
     }
 
     public void StartGame(Games game)

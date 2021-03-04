@@ -69,12 +69,13 @@ public class Dispatcher
         ReplayHandler(msgHeader);
     }
     public void CreateLobby (ClientData opener) throws IOException {
-        ++m_lobby_id;
         //open new lobby
         Lobby new_lobby = new Lobby(opener);
-        m_lob_list.put(m_lobby_id,new_lobby);
+        int lobby_id = m_client_data.GetNewLobbyId();
+        m_client_data.GetLobList().put(lobby_id,new_lobby);
         MsgHeader msgHeader = new MsgHeader();
-        msgHeader.game_id = m_lobby_id;
+        msgHeader.lobby_id = lobby_id;
+
         ReplayHandler(msgHeader);
     }
 
@@ -87,21 +88,15 @@ public class Dispatcher
 
     public void ReplayHandler(MsgHeader msg) throws IOException
     {
-//        MsgHeader to_send;
-//        to_send = msg;
+
         m_os.writeObject(msg);
     }
-//    public void SetCurrMsg(MsgHeader msg)
-//    {
-//        System.out.println("in set curr massage");
-//        m_curr_msg = msg;
-//        System.out.println("curr buff " + msg.buffer);
-//    }
+
     private MsgHeader m_curr_msg;
     private final ObjectOutputStream m_os;
     private final LoginServer m_log_req;
-    private HashMap<Integer,Lobby> m_lob_list;
+
     public Map<ReqType, Runnable> m_commands;
-    private static int m_lobby_id;
-    OperateServer.AllClients m_client_data;
+
+    public OperateServer.AllClients m_client_data;
 }

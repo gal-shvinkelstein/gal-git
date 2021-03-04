@@ -6,6 +6,6 @@ public class MsgHeader implements Serializable {
     public int usr_Id;
     public int usr_pass;
     public boolean login_status;
-    public int game_id;
+    public int lobby_id;
     public Object buffer;
 }

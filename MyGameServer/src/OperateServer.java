@@ -8,11 +8,19 @@ public class OperateServer
 {
     public static class AllClients {
         private Map<Integer, ClientData> m_client_list;
+        private HashMap<Integer,Lobby> m_lob_list;
+        private static int m_lobby_id;
 
+        public int GetNewLobbyId()
+        {
+            return ++m_lobby_id;
+        }
         public Map<Integer, ClientData> GetClientList() {
             return m_client_list;
         }
-
+        public HashMap<Integer, Lobby> GetLobList() {
+            return m_lob_list;
+        }
         public void AddClient(ClientData cd) {
             System.out.println("trying to write new gamer in add func");
 
@@ -22,6 +30,8 @@ public class OperateServer
 
         public AllClients() {
             m_client_list = new HashMap<>();
+            m_lob_list = new HashMap<>();
+            m_lobby_id = 0;
         }
     }
     public static void main(String[] args)
