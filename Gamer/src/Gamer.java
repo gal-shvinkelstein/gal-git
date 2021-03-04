@@ -164,16 +164,20 @@ public class Gamer
 
         // payment logic ...
 
-        m_my_games.add(game);
+
         MsgHeader msg = new MsgHeader();
         msg.req_type = ReqType.Purchase;
         msg.buffer = game;
+        msg.usr_pass = m_pass;
+        msg.usr_Id = m_id;
         m_os.writeObject(msg);
 
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
         System.out.println(ret.buffer);
-
+        if(ret.buffer.equals("game added")) {
+            m_my_games.add(game);
+        }
 
     }
     public void JoinLobby(int lobby_num)
