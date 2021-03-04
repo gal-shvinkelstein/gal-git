@@ -5,6 +5,7 @@ public class MsgHeader implements Serializable {
     public ReqType req_type;
     public int usr_Id;
     public int usr_pass;
+    public boolean login_status;
     public int game_id;
     public Object buffer;
 }

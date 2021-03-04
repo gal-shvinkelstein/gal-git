@@ -24,10 +24,34 @@ public class Dispatcher
                 e.printStackTrace();
             }
         });
-        m_commands.put(ReqType.Register,() -> m_log_req.RegisterNewGamer(this.m_curr_msg));
-        m_commands.put(ReqType.Login, () -> m_log_req.LogIn(this.m_curr_msg));
-        m_commands.put(ReqType.Logout, () -> m_log_req.LogOut());
-        m_commands.put(ReqType.Purchase, () -> m_log_req.Purchase(this.m_curr_msg));
+        m_commands.put(ReqType.Register,() -> {
+            try {
+                m_log_req.RegisterNewGamer(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.Login, () -> {
+            try {
+                m_log_req.LogIn(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.Logout, () -> {
+            try {
+                m_log_req.LogOut(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.Purchase, () -> {
+            try {
+                m_log_req.Purchase(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(ReqType.CreateLobby, () -> {
             try {
                 CreateLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id));
@@ -58,7 +82,7 @@ public class Dispatcher
         m_curr_msg = msg;
 
         m_commands.get(msg.req_type).run();
-        ReplayHandler(m_curr_msg);
+
     }
 
     public void ReplayHandler(MsgHeader msg) throws IOException
@@ -67,12 +91,12 @@ public class Dispatcher
 //        to_send = msg;
         m_os.writeObject(msg);
     }
-    public void SetCurrMsg(MsgHeader msg)
-    {
-        System.out.println("in set curr massage");
-        m_curr_msg = msg;
-        System.out.println("curr buff " + msg.buffer);
-    }
+//    public void SetCurrMsg(MsgHeader msg)
+//    {
+//        System.out.println("in set curr massage");
+//        m_curr_msg = msg;
+//        System.out.println("curr buff " + msg.buffer);
+//    }
     private MsgHeader m_curr_msg;
     private final ObjectOutputStream m_os;
     private final LoginServer m_log_req;

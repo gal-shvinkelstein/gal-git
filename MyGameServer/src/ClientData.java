@@ -12,6 +12,7 @@ public class ClientData
     //general data
     public int password;
     public int id;
+    public boolean log_status;
     public EnumSet<Games> my_games;
 
     //data for lobby server
