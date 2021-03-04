@@ -13,6 +13,7 @@ public class Gamer
         //ByteStreams = new BitSet();
         m_my_games = EnumSet.noneOf(Games.class);
         System.out.println("Gamer created");
+
         m_commands = new HashMap<>();
         m_commands.put(1,() -> {
             try {
@@ -90,7 +91,7 @@ public class Gamer
 
     public void Register(int pass, int id) throws IOException, ClassNotFoundException
     {
-        System.out.println("Sending register request " + "pass: " + pass + "id: " + id);
+        System.out.println("Sending register request " + "pass: " + pass + " id: " + id);
         m_pass =pass;
         m_id = id;
         MsgHeader msg = new MsgHeader();
@@ -120,8 +121,14 @@ public class Gamer
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
         // update my games
-        m_my_games = (EnumSet<Games>) ret.buffer;
-
+        if (ret.login_status) {
+            m_my_games = (EnumSet<Games>) ret.buffer;
+            System.out.println("login succeed: my games: " + m_my_games);
+        }
+        else
+        {
+            System.out.println(ret.buffer);
+        }
     }
 
     public void LogOut() throws IOException, ClassNotFoundException {
@@ -153,16 +160,14 @@ public class Gamer
     }
 
     public void Purchase(Games game) throws IOException, ClassNotFoundException {
-        System.out.println("Sending purchase request");
+        System.out.println("Sending purchase request for " + game);
 
         // payment logic ...
 
         m_my_games.add(game);
         MsgHeader msg = new MsgHeader();
         msg.req_type = ReqType.Purchase;
-//        msg.buffer = new Games();
         msg.buffer = game;
-
         m_os.writeObject(msg);
 
         MsgHeader ret;
