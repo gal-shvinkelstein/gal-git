@@ -1,3 +1,4 @@
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.EnumSet;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class ClientData
 
     //data for lobby server
     public int port;
-    public Socket client_socket;
+    public ObjectOutputStream client_os;
     int curr_game_score;
     int curr_status;
 }

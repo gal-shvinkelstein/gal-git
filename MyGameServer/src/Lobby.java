@@ -7,6 +7,10 @@ public class Lobby
         m_active_players = new HashMap<>();
         m_active_players.put(opener.id,opener);
     }
+    public void AddPlayerToLobby(ClientData joiner)
+    {
+        m_active_players.put(joiner.id,joiner);
+    }
 
     public void StartGame(Games game)
     {
