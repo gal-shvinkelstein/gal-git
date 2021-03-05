@@ -57,7 +57,13 @@ public class Gamer
                 e.printStackTrace();
             }
         });
-        m_commands.put(7,() -> LeaveLobby());
+        m_commands.put(7,() -> {
+            try {
+                LeaveLobby();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
         m_commands.put(8,() -> StartGame(this.curr_game));
         m_commands.put(9,() -> JoinGame(this.curr_game));
         m_commands.put(10,() -> LeaveGame());
@@ -209,10 +215,20 @@ public class Gamer
         curr_lobby = lobby_num;
         System.out.println(ret.buffer);
     }
-    public void LeaveLobby()
-    {
+    public void LeaveLobby() throws IOException, ClassNotFoundException {
         System.out.println("Sending Leave lobby request");
+        MsgHeader msg = new MsgHeader();
+        msg.req_type = ReqType.LeaveLobby;
+        msg.usr_pass = m_pass;
+        msg.usr_Id = m_id;
+        msg.lobby_id = curr_lobby;
 
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+
+        System.out.println(ret.buffer);
     }
     public void StartGame(Games game)
     {
