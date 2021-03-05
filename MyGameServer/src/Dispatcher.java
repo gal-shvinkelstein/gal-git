@@ -66,7 +66,20 @@ public class Dispatcher
                 e.printStackTrace();
             }
         });
-
+        m_commands.put(ReqType.LeaveLobby, () -> {
+            try {
+                LeaveLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.StartGame, () -> {
+            try {
+                m_client_data.GetLobList().get(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id).curr_lobby_id).StartGame(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
     public void Connected() throws IOException {
         System.out.println("Connection to client succeed");
@@ -77,24 +90,34 @@ public class Dispatcher
     public void CreateLobby (ClientData opener,ObjectOutputStream os) throws IOException {
         //open new lobby
         opener.client_os = os;
-        Lobby new_lobby = new Lobby(opener);
+        Lobby new_lobby = new Lobby(opener,this);
         int lobby_id = m_client_data.GetNewLobbyId();
         m_client_data.GetLobList().put(lobby_id,new_lobby);
         MsgHeader msgHeader = new MsgHeader();
         msgHeader.lobby_id = lobby_id;
+        opener.curr_lobby_id = lobby_id;
 
         ReplayHandler(msgHeader);
     }
 
     public void JoinLobby (ClientData joiner,ObjectOutputStream os, int lobby_id) throws IOException {
         joiner.client_os = os;
-
+        joiner.curr_lobby_id = lobby_id;
         m_client_data.GetLobList().get(lobby_id).AddPlayerToLobby(joiner);
         MsgHeader msgHeader = new MsgHeader();
         msgHeader.buffer = "player joined";
 
         ReplayHandler(msgHeader);
     }
+    public void LeaveLobby (ClientData joiner) throws IOException {
+
+        m_client_data.GetLobList().get(joiner.curr_lobby_id).RemovePlayerFromLobby(joiner);
+        MsgHeader msgHeader = new MsgHeader();
+        msgHeader.buffer = "player leave";
+
+        ReplayHandler(msgHeader);
+    }
+
     public void RequestHandler(MsgHeader msg) throws IOException {
         m_curr_msg = msg;
 

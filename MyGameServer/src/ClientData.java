@@ -17,7 +17,7 @@ public class ClientData
     public EnumSet<Games> my_games;
 
     //data for lobby server
-    public int port;
+    public int curr_lobby_id;
     public ObjectOutputStream client_os;
     int curr_game_score;
     int curr_status;

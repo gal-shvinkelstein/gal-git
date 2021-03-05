@@ -16,7 +16,6 @@ public class LoginServer
         new_gamer.my_games.add(Games.XCircle);
         // add all free games
 
-        new_gamer.port = 9000;
         m_disp.m_client_data.AddClient(new_gamer);
         System.out.println("gamer written");
         MsgHeader ret = new MsgHeader();
