@@ -18,7 +18,7 @@ public class ClientData
 
     //data for lobby server
     public int curr_lobby_id;
-    public ObjectOutputStream client_os;
+    public Dispatcher client_disp;
     int curr_game_score;
     int curr_status;
 }

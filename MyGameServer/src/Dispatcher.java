@@ -54,14 +54,14 @@ public class Dispatcher
         });
         m_commands.put(ReqType.CreateLobby, () -> {
             try {
-                CreateLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id), os);
+                CreateLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
         m_commands.put(ReqType.JoinLobby, () -> {
             try {
-                JoinLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id), os,this.m_curr_msg.lobby_id);
+                JoinLobby(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id),this.m_curr_msg.lobby_id);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -87,9 +87,9 @@ public class Dispatcher
         msgHeader.buffer = "Connected";
         ReplayHandler(msgHeader);
     }
-    public void CreateLobby (ClientData opener,ObjectOutputStream os) throws IOException {
+    public void CreateLobby (ClientData opener) throws IOException {
         //open new lobby
-        opener.client_os = os;
+        opener.client_disp = this;
         Lobby new_lobby = new Lobby(opener,this);
         int lobby_id = m_client_data.GetNewLobbyId();
         m_client_data.GetLobList().put(lobby_id,new_lobby);
@@ -100,8 +100,8 @@ public class Dispatcher
         ReplayHandler(msgHeader);
     }
 
-    public void JoinLobby (ClientData joiner,ObjectOutputStream os, int lobby_id) throws IOException {
-        joiner.client_os = os;
+    public void JoinLobby (ClientData joiner, int lobby_id) throws IOException {
+        joiner.client_disp = this;
         joiner.curr_lobby_id = lobby_id;
         m_client_data.GetLobList().get(lobby_id).AddPlayerToLobby(joiner);
         MsgHeader msgHeader = new MsgHeader();

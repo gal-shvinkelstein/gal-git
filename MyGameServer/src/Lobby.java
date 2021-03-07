@@ -3,11 +3,11 @@ import java.util.HashMap;
 
 public class Lobby
 {
-    public Lobby(ClientData opener, Dispatcher disp)
+    public Lobby(ClientData opener)
     {
         m_active_players = new HashMap<>();
         m_active_players.put(opener.id,opener);
-        m_disp = disp;
+
     }
     public void AddPlayerToLobby(ClientData joiner)
     {
@@ -50,7 +50,7 @@ public class Lobby
             System.out.println("client doesn't have this game");
             ret.buffer = "you should buy the game first";
         }
-        m_disp.ReplayHandler(ret);
+        log_c.client_disp.ReplayHandler(ret);
 
     }
     public void RestartGame()
@@ -60,8 +60,9 @@ public class Lobby
 
     public void JoinGame(MsgHeader joiner) throws IOException {
         MsgHeader ret = new MsgHeader();
+        ClientData log_c = m_active_players.get(joiner.usr_Id);
         if(m_active_game.GetCurrActiveNumOfPlayers() < m_active_game.GetMaxPlayers()) {
-            ClientData log_c = m_active_players.get(joiner.usr_Id);
+
             m_active_game.JoinGame(log_c);
             ret.buffer = "player joined";
         }
@@ -69,24 +70,23 @@ public class Lobby
         {
             ret.buffer = "game is full";
         }
-        m_disp.ReplayHandler(ret);
+        log_c.client_disp.ReplayHandler(ret);
     }
     public void LeaveGame(MsgHeader leaver) throws IOException {
         MsgHeader ret = new MsgHeader();
         ClientData log_c = m_active_players.get(leaver.usr_Id);
         m_active_game.LeaveGame(log_c);
         ret.buffer = "tnx for playing";
-        m_disp.ReplayHandler(ret);
+        log_c.client_disp.ReplayHandler(ret);
     }
 
     private void Next(MsgHeader last_turn) throws IOException {
-        MsgHeader ret = new MsgHeader();
+        MsgHeader ret;
         ret = m_active_game.Next(last_turn);
 
-        m_disp.ReplayHandler(ret);
+        m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
     }
 
     private HashMap<Integer, ClientData > m_active_players;
     private IGamesManager m_active_game;
-    Dispatcher m_disp;
 }
