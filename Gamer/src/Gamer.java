@@ -64,18 +64,42 @@ public class Gamer
                 e.printStackTrace();
             }
         });
-        m_commands.put(8,() -> StartGame(this.curr_game));
-        m_commands.put(9,() -> JoinGame(this.curr_game));
-        m_commands.put(10,() -> LeaveGame());
-        m_commands.put(11,() -> RestartGame());
+        m_commands.put(8,() -> {
+            try {
+                StartGame(this.curr_game);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(9,() -> {
+            try {
+                JoinGame(this.curr_game);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(10,() -> {
+            try {
+                LeaveGame();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(11,() -> {
+            try {
+                RestartGame();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
 
-        curr_port = 9000;
+        int curr_port = 9000;
 
         //connect to main server
         InetAddress address=InetAddress.getLocalHost(); // server address?
 
         try {
-            m_s1 = new Socket(address, curr_port);
+            Socket m_s1 = new Socket(address, curr_port);
             m_os= new ObjectOutputStream(m_s1.getOutputStream());
             MsgHeader msgHeader = new MsgHeader();
             msgHeader.req_type = ReqType.connection;
@@ -112,10 +136,7 @@ public class Gamer
         System.out.println("Sending register request " + "pass: " + pass + " id: " + id);
         m_pass =pass;
         m_id = id;
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.Register;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
+        MsgHeader msg = InitMsg(ReqType.Register,m_id,m_pass,0);
 
         // send msg to server
         m_os.writeObject(msg);
@@ -128,11 +149,7 @@ public class Gamer
         System.out.println("Sending Login request");
         m_pass =pass;
         m_id = id;
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.Login;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
-
+        MsgHeader msg = InitMsg(ReqType.Login,m_id,m_pass,0);
         // send msg to server
         m_os.writeObject(msg);
         // received back confirmation + set of my games
@@ -151,11 +168,7 @@ public class Gamer
 
     public void LogOut() throws IOException, ClassNotFoundException {
         System.out.println("Sending Logout request");
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.Logout;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
-
+        MsgHeader msg = InitMsg(ReqType.Logout,m_id,m_pass,0);
         // send msg to server
         m_os.writeObject(msg);
         // received back confirmation
@@ -166,10 +179,7 @@ public class Gamer
 
     public void CreateLobby() throws IOException, ClassNotFoundException {
         System.out.println("Sending Create lobby request");
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.CreateLobby;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
+        MsgHeader msg = InitMsg(ReqType.CreateLobby,m_id,m_pass,0);
 
         m_os.writeObject(msg);
 
@@ -183,13 +193,8 @@ public class Gamer
         System.out.println("Sending purchase request for " + game);
 
         // payment logic ...
-
-
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.Purchase;
+        MsgHeader msg = InitMsg(ReqType.Purchase,m_id,m_pass,0);
         msg.buffer = game;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
         m_os.writeObject(msg);
 
         MsgHeader ret;
@@ -202,12 +207,7 @@ public class Gamer
     }
     public void JoinLobby(int lobby_num) throws IOException, ClassNotFoundException {
         System.out.println("Sending join lobby request");
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.JoinLobby;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
-        msg.lobby_id = lobby_num;
-
+        MsgHeader msg = InitMsg(ReqType.JoinLobby,m_id,m_pass,lobby_num);
         m_os.writeObject(msg);
 
         MsgHeader ret;
@@ -217,12 +217,7 @@ public class Gamer
     }
     public void LeaveLobby() throws IOException, ClassNotFoundException {
         System.out.println("Sending Leave lobby request");
-        MsgHeader msg = new MsgHeader();
-        msg.req_type = ReqType.LeaveLobby;
-        msg.usr_pass = m_pass;
-        msg.usr_Id = m_id;
-        msg.lobby_id = curr_lobby;
-
+        MsgHeader msg = InitMsg(ReqType.LeaveLobby,m_id,m_pass,curr_lobby);
         m_os.writeObject(msg);
 
         MsgHeader ret;
@@ -230,24 +225,62 @@ public class Gamer
 
         System.out.println(ret.buffer);
     }
-    public void StartGame(Games game)
-    {
+    public void StartGame(Games game) throws IOException, ClassNotFoundException {
         System.out.println("Sending start game request");
+        MsgHeader msg = InitMsg(ReqType.StartGame,m_id,m_pass,curr_lobby);
+        msg.buffer = game;
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+
+        System.out.println(ret.buffer);
+        if(ret.buffer.equals("game on! waiting for other participants"))
+        {
+            switch (game)
+            {
+                case XCircle:
+                    game_manger = new XCircleManager();
+                    break;
+
+                // add all games ....
+            }
+            WaitForManager();
+        }
 
     }
-    public void JoinGame(Games game)
-    {
+    public void JoinGame(Games game) throws IOException, ClassNotFoundException {
         System.out.println("Sending join game request");
+        MsgHeader msg = InitMsg(ReqType.JoinGame,m_id,m_pass,curr_lobby);
+        msg.buffer = game;
+        m_os.writeObject(msg);
 
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+
+        System.out.println(ret.buffer);
+        WaitForManager();
     }
-    public void LeaveGame()
-    {
+    public void LeaveGame() throws IOException, ClassNotFoundException {
         System.out.println("Sending leave game request");
+        MsgHeader msg = InitMsg(ReqType.LeaveGame,m_id,m_pass,curr_lobby);
+        m_os.writeObject(msg);
 
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+
+        System.out.println(ret.buffer);
     }
-    public void RestartGame()
-    {
+    public void RestartGame() throws IOException, ClassNotFoundException {
         System.out.println("Sending restart game request");
+        MsgHeader msg = InitMsg(ReqType.RestartGame,m_id,m_pass,curr_lobby);
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+
+        System.out.println(ret.buffer);
+        WaitForManager();
 
     }
     public void DisplayMyGames()
@@ -255,15 +288,51 @@ public class Gamer
         System.out.println(m_my_games);
     }
 
+    public void WaitForManager() throws IOException, ClassNotFoundException {
+        System.out.println("I'm waiting");
+        MsgHeader msg = InitMsg(ReqType.Wait,m_id,m_pass,curr_lobby);
+        msg.game_status = 100;
+
+        m_os.writeObject(msg);
+
+        MsgHeader ret;
+        ret = (MsgHeader) m_is.readObject();
+        while (ret.game_status == 1) {
+            MsgHeader next = game_manger.PlayTurn(ret);
+            m_os.writeObject(next);
+            System.out.println("Wait to your turn...");
+            ret = (MsgHeader) m_is.readObject();
+
+        }
+        if(ret.game_status == 2)
+        {
+            game_manger.DisplayResults(ret);
+        }
+        else
+        {
+            WaitForManager();
+        }
+    }
+
+    private MsgHeader InitMsg(ReqType type, int id, int pass, int lobby_id)
+    {
+        MsgHeader msg = new MsgHeader();
+        msg.req_type = type;
+        msg.usr_Id = id;
+        msg.usr_pass = pass;
+        msg.lobby_id = lobby_id;
+
+        return msg;
+    }
+
     private int m_id;
     private int m_pass;
-    private int curr_port;
     private int curr_lobby;
     private Games curr_game;
     private EnumSet<Games> m_my_games;
     public Map<Integer, Runnable> m_commands;
+    public IGamesClients game_manger;
 
-    private Socket m_s1;
     private ObjectInputStream m_is;
     private ObjectOutputStream m_os;
 

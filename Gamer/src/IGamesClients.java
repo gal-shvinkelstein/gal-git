@@ -1,7 +1,6 @@
 public interface IGamesClients {
-    void PlayTurn();
-    void DisplayStatus();
-    void DisplayResults();
-    //void LeaveGame();
+    MsgHeader PlayTurn(MsgHeader last_move);
+    void DisplayResults(MsgHeader ret);
+    String JoinMassage();
 
 }
