@@ -26,10 +26,12 @@ public class OperateServer
 
             m_client_list.put(cd.id, cd);
             System.out.println("ok");
+            // TODO: write also in a backup file on disc
         }
 
         public AllClients() {
             m_client_list = new HashMap<>();
+            // ToDo: load m_clients_list from backup file
             m_lob_list = new HashMap<>();
             m_lobby_id = 0;
         }

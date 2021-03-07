@@ -11,5 +11,6 @@ public enum ReqType
     StartGame,
     LeaveGame,
     JoinGame,
-    RestartGame
+    RestartGame,
+    PlayNext
 }
