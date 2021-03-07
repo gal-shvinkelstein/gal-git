@@ -6,11 +6,11 @@ public class ChessManager implements IGamesManager{
         m_active_players.put(opener.id,opener);
     }
     @Override
-    public void JoinGame(ClientData joiner)
+    public boolean JoinGame(ClientData joiner)
     {
 
         m_active_players.put(joiner.id, joiner);
-
+        return true;
     }
     @Override
     public void RestartGame()
@@ -31,16 +31,7 @@ public class ChessManager implements IGamesManager{
 
         return ret;
     }
-    @Override
-    public MsgHeader SendStatus()
-    {
-        MsgHeader ret = new MsgHeader();
 
-
-
-        return ret;
-    }
-    @Override
     public MsgHeader GameResult()
     {
         MsgHeader ret = new MsgHeader();
@@ -58,6 +49,11 @@ public class ChessManager implements IGamesManager{
     public int GetCurrActiveNumOfPlayers()
     {
         return m_active_players.size();
+    }
+    @Override
+    public HashMap<Integer, ClientData > GetForBroadcast()
+    {
+        return m_active_players;
     }
     private final int max_players = 2;
     private HashMap<Integer, ClientData > m_active_players;

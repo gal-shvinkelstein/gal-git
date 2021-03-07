@@ -53,9 +53,11 @@ public class Lobby
         log_c.client_disp.ReplayHandler(ret);
 
     }
-    public void RestartGame()
-    {
+    public void RestartGame() throws IOException {
+        MsgHeader ret = new MsgHeader();
+        ret.game_status = 1;
         m_active_game.RestartGame();
+        Next(ret);
     }
 
     public void JoinGame(MsgHeader joiner) throws IOException {
@@ -63,14 +65,27 @@ public class Lobby
         ClientData log_c = m_active_players.get(joiner.usr_Id);
         if(m_active_game.GetCurrActiveNumOfPlayers() < m_active_game.GetMaxPlayers()) {
 
-            m_active_game.JoinGame(log_c);
-            ret.buffer = "player joined";
+            boolean status = m_active_game.JoinGame(log_c);
+
+            if(status)
+            {
+                ret.buffer = "player joined - wait to your turn";
+                ret.game_status = 1;
+                Next(ret);
+            }
+            else
+            {
+                ret.buffer = "player joined - wait for more participants";
+                ret.game_status = 0;
+                log_c.client_disp.ReplayHandler(ret);
+            }
         }
         else
         {
             ret.buffer = "game is full";
+            log_c.client_disp.ReplayHandler(ret);
         }
-        log_c.client_disp.ReplayHandler(ret);
+
     }
     public void LeaveGame(MsgHeader leaver) throws IOException {
         MsgHeader ret = new MsgHeader();
@@ -80,11 +95,26 @@ public class Lobby
         log_c.client_disp.ReplayHandler(ret);
     }
 
-    private void Next(MsgHeader last_turn) throws IOException {
+    public void Next(MsgHeader last_turn) throws IOException {
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
+        //check results
+        if(ret.game_status != 2) {
+            m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
+        }
+        else
+        {
+            HashMap<Integer, ClientData> broadcast = m_active_game.GetForBroadcast();
+            MsgHeader finalRet = ret;
+            broadcast.forEach((k, v) -> {
+                try {
+                    v.client_disp.ReplayHandler(finalRet);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
-        m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
+        }
     }
 
     private HashMap<Integer, ClientData > m_active_players;

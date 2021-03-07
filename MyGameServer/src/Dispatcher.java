@@ -80,6 +80,36 @@ public class Dispatcher
                 e.printStackTrace();
             }
         });
+
+        m_commands.put(ReqType.LeaveGame, () -> {
+            try {
+                m_client_data.GetLobList().get(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id).curr_lobby_id).LeaveGame(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        m_commands.put(ReqType.JoinGame, () -> {
+            try {
+                m_client_data.GetLobList().get(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id).curr_lobby_id).JoinGame(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.PlayNext, () -> {
+            try {
+                m_client_data.GetLobList().get(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id).curr_lobby_id).Next(this.m_curr_msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        m_commands.put(ReqType.RestartGame, () -> {
+            try {
+                m_client_data.GetLobList().get(m_client_data.GetClientList().get(this.m_curr_msg.usr_Id).curr_lobby_id).RestartGame();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
     public void Connected() throws IOException {
         System.out.println("Connection to client succeed");
@@ -90,7 +120,7 @@ public class Dispatcher
     public void CreateLobby (ClientData opener) throws IOException {
         //open new lobby
         opener.client_disp = this;
-        Lobby new_lobby = new Lobby(opener,this);
+        Lobby new_lobby = new Lobby(opener);
         int lobby_id = m_client_data.GetNewLobbyId();
         m_client_data.GetLobList().put(lobby_id,new_lobby);
         MsgHeader msgHeader = new MsgHeader();
@@ -120,9 +150,10 @@ public class Dispatcher
 
     public void RequestHandler(MsgHeader msg) throws IOException {
         m_curr_msg = msg;
-
-        m_commands.get(msg.req_type).run();
-
+        if (msg.game_status != 100) // 100 means player wait for his turn
+        {
+            m_commands.get(msg.req_type).run();
+        }
     }
 
     public void ReplayHandler(MsgHeader msg) throws IOException
