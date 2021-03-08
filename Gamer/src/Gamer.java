@@ -13,7 +13,7 @@ public class Gamer
         //ByteStreams = new BitSet();
         m_my_games = EnumSet.noneOf(Games.class);
         System.out.println("Gamer created");
-
+        m_log_stat = false;
         m_commands = new HashMap<>();
         m_commands.put(1,() -> {
             try {
@@ -159,6 +159,7 @@ public class Gamer
         if (ret.login_status) {
             m_my_games = (EnumSet<Games>) ret.buffer;
             System.out.println("login succeed: my games: " + m_my_games);
+            m_log_stat = true;
         }
         else
         {
@@ -175,6 +176,7 @@ public class Gamer
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
         System.out.println(ret.buffer);
+        m_log_stat = false;
     }
 
     public void CreateLobby() throws IOException, ClassNotFoundException {
@@ -257,9 +259,22 @@ public class Gamer
 
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
+        if(ret.game_status != 100) {
+            switch (game)
+            {
+                case XCircle:
+                    game_manger = new XCircleManager();
+                    break;
 
-        System.out.println(ret.buffer);
-        WaitForManager();
+                // add all games ....
+            }
+
+            System.out.println(ret.buffer + " " + game_manger.JoinMassage());
+            WaitForManager();
+        }
+        else {
+            System.out.println(ret.buffer);
+        }
     }
     public void LeaveGame() throws IOException, ClassNotFoundException {
         System.out.println("Sending leave game request");
@@ -291,12 +306,13 @@ public class Gamer
     public void WaitForManager() throws IOException, ClassNotFoundException {
         System.out.println("I'm waiting");
         MsgHeader msg = InitMsg(ReqType.Wait,m_id,m_pass,curr_lobby);
-        msg.game_status = 100;
+        //msg.game_status = 100;
 
         m_os.writeObject(msg);
 
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
+//        System.out.println("massage arrived?");
         while (ret.game_status == 1) {
             MsgHeader next = game_manger.PlayTurn(ret);
             m_os.writeObject(next);
@@ -321,12 +337,13 @@ public class Gamer
         msg.usr_Id = id;
         msg.usr_pass = pass;
         msg.lobby_id = lobby_id;
-
+        msg.login_status = m_log_stat;
         return msg;
     }
 
     private int m_id;
     private int m_pass;
+    private Boolean m_log_stat;
     private int curr_lobby;
     private Games curr_game;
     private EnumSet<Games> m_my_games;

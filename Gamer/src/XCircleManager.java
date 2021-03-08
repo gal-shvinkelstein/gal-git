@@ -11,7 +11,7 @@ public class XCircleManager implements IGamesClients{
     public MsgHeader PlayTurn(MsgHeader last_move) {
 
         int[] curr_board = (int[]) last_move.buffer;
-        int count = 1;
+        int count = 0;
         char c;
         for(int i = 0; i < 9; ++i)
         {
@@ -45,6 +45,7 @@ public class XCircleManager implements IGamesClients{
         MsgHeader my_turn = new MsgHeader();
         my_turn.req_type = ReqType.PlayNext;
         my_turn.buffer = curr_board;
+        my_turn.game_status = 1;
         return my_turn;
     }
 
