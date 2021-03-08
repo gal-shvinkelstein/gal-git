@@ -6,6 +6,7 @@ public class XCircleManger implements IGamesManager{
     {
         next_turn = new int[2];
         player_turn = 0;
+        step = 0;
         next_turn[0] = opener.id;
         board = new int[]{0,0,0,0,0,0,0,0,0};
         m_active_players = new HashMap<>();
@@ -26,6 +27,7 @@ public class XCircleManger implements IGamesManager{
             board[i] = 0;
         }
         player_turn = 0;
+        step = 0;
     }
     @Override
     public void LeaveGame(ClientData leaver)
@@ -36,8 +38,9 @@ public class XCircleManger implements IGamesManager{
     public MsgHeader Next(MsgHeader last_move)
     {
         MsgHeader ret = new MsgHeader();
+        ret.game_status = 1;
         int status = 0;
-        if (last_move.game_status == 1)
+        if (step == 0)
         {
             ret.buffer = board;
         }
@@ -48,6 +51,7 @@ public class XCircleManger implements IGamesManager{
             board = (int[]) last_move.buffer;
             status = GameResult();
         }
+        ++step;
         ret.usr_Id = next_turn[player_turn];
 
         if(status != 0)
@@ -55,7 +59,7 @@ public class XCircleManger implements IGamesManager{
             ret.game_status = 2;
             ret.buffer = "The winner is: " + next_turn[status - 1];
         }
-
+        ret.req_type = ReqType.PlayNext;
         return ret;
     }
 
@@ -98,5 +102,6 @@ public class XCircleManger implements IGamesManager{
     private int[] board;
     private int [] next_turn;
     private HashMap<Integer, ClientData > m_active_players;
+    private int step;
 
 }

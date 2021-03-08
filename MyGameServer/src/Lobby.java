@@ -28,12 +28,15 @@ public class Lobby
         MsgHeader ret = new MsgHeader();
         System.out.println("in start game request, log status: " + msg.login_status);
         Games new_game = (Games) msg.buffer;
+        System.out.println("for client id: " + log_c.id + " games list: " + log_c.my_games);
         if(m_active_players.get(msg.usr_Id).my_games.contains(new_game)) {
 
             //create new game manger
             switch (new_game) {
                 case XCircle:
+                    System.out.println("Creating XCircle manager");
                     m_active_game = new XCircleManger(log_c);
+                    System.out.println("OK");
                     break;
                 case CardsWar:
                     m_active_game = new CardsWarManager(log_c);
@@ -51,6 +54,7 @@ public class Lobby
             ret.buffer = "you should buy the game first";
         }
         log_c.client_disp.ReplayHandler(ret);
+        System.out.println("Reply sent");
 
     }
     public void RestartGame() throws IOException {
@@ -63,7 +67,13 @@ public class Lobby
     public void JoinGame(MsgHeader joiner) throws IOException {
         MsgHeader ret = new MsgHeader();
         ClientData log_c = m_active_players.get(joiner.usr_Id);
-        if(m_active_game.GetCurrActiveNumOfPlayers() < m_active_game.GetMaxPlayers()) {
+        if(m_active_game == null)
+        {
+            ret.buffer = "game was not created";
+            ret.game_status = 100;
+            log_c.client_disp.ReplayHandler(ret);
+        }
+        else if(m_active_game.GetCurrActiveNumOfPlayers() < m_active_game.GetMaxPlayers()) {
 
             boolean status = m_active_game.JoinGame(log_c);
 
@@ -71,6 +81,7 @@ public class Lobby
             {
                 ret.buffer = "player joined - wait to your turn";
                 ret.game_status = 1;
+                log_c.client_disp.ReplayHandler(ret);
                 Next(ret);
             }
             else
@@ -83,6 +94,7 @@ public class Lobby
         else
         {
             ret.buffer = "game is full";
+            ret.game_status = 100;
             log_c.client_disp.ReplayHandler(ret);
         }
 
