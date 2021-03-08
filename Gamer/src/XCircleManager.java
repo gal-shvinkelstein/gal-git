@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class XCircleManager implements IGamesClients{
     public XCircleManager()
     {
-        System.out.println("XCircle started you are X (1)");
+        System.out.println("XCircle started X(1) for starter and O(2) for joiner");
         m_scanner = new Scanner(System.in);
     }
 
@@ -75,7 +75,7 @@ public class XCircleManager implements IGamesClients{
 
     @Override
     public String JoinMassage() {
-        return "You are O (2)";
+        return "Joined successfully";
     }
 
     private Scanner m_scanner;
