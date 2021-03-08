@@ -150,13 +150,13 @@ public class Dispatcher
 
     public void RequestHandler(MsgHeader msg) throws IOException {
         m_curr_msg = msg;
-        if (msg.req_type != ReqType.Wait) // 100 means player wait for his turn
+        if (msg.req_type != ReqType.Wait)
         {
             m_commands.get(msg.req_type).run();
         }
         else
         {
-            System.out.println("client wait for his turn");
+            System.out.println("client " +msg.usr_Id +  " wait for his turn");
         }
     }
 

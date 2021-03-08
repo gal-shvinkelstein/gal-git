@@ -42,6 +42,7 @@ public class XCircleManger implements IGamesManager{
         int status = 0;
         if (step == 0)
         {
+            System.out.println(" move step: " + step);
             ret.buffer = board;
         }
         else
@@ -50,6 +51,7 @@ public class XCircleManger implements IGamesManager{
             player_turn = (player_turn + 1) % max_players;
             board = (int[]) last_move.buffer;
             status = GameResult();
+            System.out.println(" move step: " + step);
         }
         ++step;
         ret.usr_Id = next_turn[player_turn];
@@ -57,7 +59,8 @@ public class XCircleManger implements IGamesManager{
         if(status != 0)
         {
             ret.game_status = 2;
-            ret.buffer = "The winner is: " + next_turn[status - 1];
+            ret.winning_msg = "The winner is: " + next_turn[status - 1];
+            ret.buffer = board;
         }
         ret.req_type = ReqType.PlayNext;
         return ret;
@@ -68,13 +71,15 @@ public class XCircleManger implements IGamesManager{
         int winner = 0;
         if((board[0] == 1 && board[1] == 1 && board[2] == 1) || (board[3] == 1 && board[4] == 1 && board[5] == 1) ||
                 (board[6] == 1 && board[7] == 1 && board[8] == 1) || (board[0] == 1 && board[4] == 1 && board[8] == 1) ||
-                (board[2] == 1 && board[4] == 1 && board[6] == 1))
+                (board[2] == 1 && board[4] == 1 && board[6] == 1) || (board[0] == 1 && board[3] == 1 && board[6] == 1) ||
+                (board[1] == 1 && board[4] == 1 && board[7] == 1) || (board[2] == 1 && board[5] == 1 && board[8] == 1))
         {
             winner = 1;
         }
         else if((board[0] == 2 && board[1] == 2 && board[2] == 2) || (board[3] == 2 && board[4] == 2 && board[5] == 2) ||
                 (board[6] == 2 && board[7] == 2 && board[8] == 2) || (board[0] == 2 && board[4] == 2 && board[8] == 2) ||
-                (board[2] == 2 && board[4] == 2 && board[6] == 2))
+                (board[2] == 2 && board[4] == 2 && board[6] == 2)|| (board[0] == 2 && board[3] == 2 && board[6] == 2) ||
+                (board[1] == 2 && board[4] == 2 && board[7] == 2) || (board[2] == 2 && board[5] == 2 && board[8] == 2))
         {
             winner = 2;
         }
