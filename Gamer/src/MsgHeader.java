@@ -9,5 +9,6 @@ public class MsgHeader implements Serializable {
     public boolean login_status;
     public int lobby_id;
     public int game_status;
+    public String winning_msg;
     public Object buffer;
 }

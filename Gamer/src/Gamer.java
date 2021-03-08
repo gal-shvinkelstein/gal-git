@@ -306,28 +306,23 @@ public class Gamer
     public void WaitForManager() throws IOException, ClassNotFoundException {
         System.out.println("I'm waiting");
         MsgHeader msg = InitMsg(ReqType.Wait,m_id,m_pass,curr_lobby);
-        //msg.game_status = 100;
 
         m_os.writeObject(msg);
 
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
-//        System.out.println("massage arrived?");
-        while (ret.game_status == 1) {
-            MsgHeader next = game_manger.PlayTurn(ret);
-            m_os.writeObject(next);
-            System.out.println("Wait to your turn...");
-            ret = (MsgHeader) m_is.readObject();
-
-        }
         if(ret.game_status == 2)
         {
             game_manger.DisplayResults(ret);
         }
-        else
-        {
+        if (ret.game_status == 1) {
+            MsgHeader next = game_manger.PlayTurn(ret);
+            next.usr_Id = m_id;
+            m_os.writeObject(next);
+
             WaitForManager();
         }
+
     }
 
     private MsgHeader InitMsg(ReqType type, int id, int pass, int lobby_id)
