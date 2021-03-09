@@ -27,7 +27,7 @@ public class Dispatcher
         m_commands.put(ReqType.Register,() -> {
             try {
                 m_log_req.RegisterNewGamer(this.m_curr_msg);
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });
@@ -48,7 +48,7 @@ public class Dispatcher
         m_commands.put(ReqType.Purchase, () -> {
             try {
                 m_log_req.Purchase(this.m_curr_msg);
-            } catch (IOException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         });

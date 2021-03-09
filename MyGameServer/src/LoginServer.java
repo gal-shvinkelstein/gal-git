@@ -8,7 +8,7 @@ public class LoginServer
         m_disp = disp;
     }
 
-    public void RegisterNewGamer(MsgHeader msg) throws IOException {
+    public void RegisterNewGamer(MsgHeader msg) throws IOException, ClassNotFoundException {
         System.out.println("in register new gamer1");
         ClientData new_gamer = new ClientData();
         new_gamer.id = msg.usr_Id;
@@ -60,13 +60,14 @@ public class LoginServer
     }
 
 
-    public void Purchase(MsgHeader msg) throws IOException {
+    public void Purchase(MsgHeader msg) throws IOException, ClassNotFoundException {
         ClientData log_c = m_disp.m_client_data.GetClientList().get(msg.usr_Id);
         MsgHeader ret = new MsgHeader();
         System.out.println("in purchase request, log status: " + log_c.log_status);
         if(log_c.log_status) {
             Games new_game = (Games) msg.buffer;
             m_disp.m_client_data.GetClientList().get(msg.usr_Id).my_games.add(new_game);
+            m_disp.m_client_data.my_backup.UpdatePurchase(msg.usr_Id,new_game);
 
             System.out.println("After last purchase for client id: " + log_c.id + " games list: " + log_c.my_games);
             ret.buffer = "game added";

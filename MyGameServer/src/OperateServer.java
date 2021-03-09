@@ -1,10 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class OperateServer
 {
@@ -13,7 +10,7 @@ public class OperateServer
         private HashMap<Integer,Lobby> m_lob_list;
         private static int m_lobby_id;
 
-        private BackupClientList my_backup;
+        public BackupClientList my_backup;
 
 
         public int GetNewLobbyId()
@@ -27,8 +24,7 @@ public class OperateServer
             return m_lob_list;
         }
 
-        public void AddClient(ClientData cd) throws IOException
-        {
+        public void AddClient(ClientData cd) throws IOException, ClassNotFoundException {
             System.out.println("trying to write new gamer in add func");
 
             m_client_list.put(cd.id, cd);
@@ -43,7 +39,11 @@ public class OperateServer
                 my_backup = new BackupClientList();
                 m_client_list = new HashMap<>();
                 // ToDo: load m_clients_list from backup file
-                m_client_list = my_backup.LoadBackup();
+                List to_copy = my_backup.LoadBackup();
+            for (Object o : to_copy) {
+                ClientData curr = (ClientData) o;
+                m_client_list.put(curr.id, curr);
+            }
 
 //
                 m_lob_list = new HashMap<>();
