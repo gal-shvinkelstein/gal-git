@@ -1,9 +1,10 @@
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class ClientData
+public class ClientData implements Serializable
 {
     ClientData()
     {

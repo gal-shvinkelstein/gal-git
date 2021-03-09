@@ -1,7 +1,9 @@
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class OperateServer
@@ -10,6 +12,9 @@ public class OperateServer
         private Map<Integer, ClientData> m_client_list;
         private HashMap<Integer,Lobby> m_lob_list;
         private static int m_lobby_id;
+
+        private BackupClientList my_backup;
+
 
         public int GetNewLobbyId()
         {
@@ -21,23 +26,32 @@ public class OperateServer
         public HashMap<Integer, Lobby> GetLobList() {
             return m_lob_list;
         }
-        public void AddClient(ClientData cd) {
+
+        public void AddClient(ClientData cd) throws IOException
+        {
             System.out.println("trying to write new gamer in add func");
 
             m_client_list.put(cd.id, cd);
+            my_backup.DoBackup(cd);
             System.out.println("ok");
-            // TODO: write also in a backup file on disc
+
         }
 
-        public AllClients() {
-            m_client_list = new HashMap<>();
-            // ToDo: load m_clients_list from backup file
-            m_lob_list = new HashMap<>();
-            m_lobby_id = 0;
+
+        public AllClients() throws IOException, ClassNotFoundException {
+
+                my_backup = new BackupClientList();
+                m_client_list = new HashMap<>();
+                // ToDo: load m_clients_list from backup file
+                m_client_list = my_backup.LoadBackup();
+
+//
+                m_lob_list = new HashMap<>();
+                m_lobby_id = 0;
+
         }
     }
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         Socket s = null;
         ServerSocket login = null;
         //ServerSocket lobby = null;
@@ -59,6 +73,7 @@ public class OperateServer
         {
             try
             {
+                assert login != null;
                 s= login.accept();
                 System.out.println("connection Established");
                 ServerThread st=new ServerThread(s, clients_data);
@@ -72,6 +87,7 @@ public class OperateServer
 
             }
         }
+
 
     }
 
