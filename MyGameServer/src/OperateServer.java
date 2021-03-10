@@ -39,11 +39,11 @@ public class OperateServer
                 my_backup = new BackupClientList();
                 m_client_list = new HashMap<>();
                 // ToDo: load m_clients_list from backup file
-                List to_copy = my_backup.LoadBackup();
-            for (Object o : to_copy) {
-                ClientData curr = (ClientData) o;
-                m_client_list.put(curr.id, curr);
-            }
+                m_client_list = my_backup.LoadBackup();
+//            for (Object o : to_copy) {
+//                ClientData curr = (ClientData) o;
+//                m_client_list.put(curr.id, curr);
+//            }
 
 //
                 m_lob_list = new HashMap<>();
