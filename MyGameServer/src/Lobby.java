@@ -116,7 +116,6 @@ public class Lobby
         //check results
         if(ret.game_status != 2) {
             System.out.println(" next turn id: " + ret.usr_Id);
-//            m_active_players.get(id).client_disp.ReplayHandler(ret);
             m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
         }
         else
