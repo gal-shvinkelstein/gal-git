@@ -11,8 +11,8 @@ public class BackupClientList implements Serializable{
             FileInputStream fi = new FileInputStream("client_backup.ser");
             m_i = new ObjectInputStream(fi);
             my_backup_data = new HashMap<>();
-            HashMap<Integer,ClientData> to_copy1;
-            to_copy1 = (HashMap<Integer,ClientData>) m_i.readObject();
+            HashMap<Integer, ClientData> to_copy1;
+            to_copy1 = (HashMap<Integer, ClientData>) m_i.readObject();
             if (to_copy1 != null) {
                 System.out.println("upload backup succeed");
                 my_backup_data = to_copy1;
@@ -27,11 +27,11 @@ public class BackupClientList implements Serializable{
         m_o.writeObject(my_backup_data);
 
     }
-    public void UpdatePurchase(int id,Games new_game) throws IOException, ClassNotFoundException {
+    public void UpdatePurchase(int id, Games new_game) throws IOException, ClassNotFoundException {
         my_backup_data.get(id).my_games.add(new_game);
         m_o.writeObject(my_backup_data);
     }
-    public HashMap<Integer,ClientData> LoadBackup()
+    public HashMap<Integer, ClientData> LoadBackup()
     {
         return my_backup_data;
     }

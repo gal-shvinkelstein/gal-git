@@ -57,4 +57,6 @@ public class CardsWarManager implements IGamesManager{
     }
     private final int max_players = 4;
     private HashMap<Integer, ClientData > m_active_players;
+
+
 }
