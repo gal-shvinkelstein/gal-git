@@ -58,11 +58,14 @@ public class TexasHoldemManger implements IGamesManager{
             ret.usr_Id = next_turn.get(player_turn_index).id;
             ret.game_status = 0;
             ++in_hand_counter;
-            if(in_hand_counter == curr_in_hand)
-            {
-                game_step = 1;
-                in_hand_counter = 0;
-            }
+
+        }
+
+
+        if(in_hand_counter == curr_in_hand)
+        {
+            game_step = (game_step + 1) % NumOfGameSteps;
+            in_hand_counter = 0;
         }
 
 
@@ -104,6 +107,7 @@ public class TexasHoldemManger implements IGamesManager{
         return m_active_players;
     }
 
+    private final int NumOfGameSteps = 9;
     private int game_step;
     private Vector<ClientData> next_turn;
     private int player_turn_index;
