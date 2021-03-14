@@ -1,8 +1,5 @@
 //package Poker;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class TexasHoldemManger implements IGamesManager{
     public TexasHoldemManger(ClientData opener)
@@ -19,6 +16,9 @@ public class TexasHoldemManger implements IGamesManager{
         m_active_players.put(opener.id,opener);
 
         next_turn.set(joined_num++, opener);
+
+        curr_pot = new Pot(0);
+
         game_deck = new Deck();
         game_deck.shuffle();
 
@@ -87,6 +87,7 @@ public class TexasHoldemManger implements IGamesManager{
     }
     private void StartNewRound()
     {
+        curr_pot.contributors.addAll(next_turn);
 
         //updating in hand
     }
@@ -108,6 +109,7 @@ public class TexasHoldemManger implements IGamesManager{
     }
 
     private final int NumOfGameSteps = 9;
+    private final int SmallBlind = 5;
     private int game_step;
     private Vector<ClientData> next_turn;
     private int player_turn_index;
@@ -117,6 +119,38 @@ public class TexasHoldemManger implements IGamesManager{
     private HashMap<Integer, ClientData > m_active_players;
     private int in_hand_counter;
     private int curr_in_hand;
+    private Pot curr_pot;
+
+
+    public static class Pot
+    {
+        public Pot(int initial_val)
+        {
+
+            contributors = new HashSet<>();
+        }
+        public void clear() {
+            pot_val = 0;
+            contributors.clear();
+        }
+        public void addContributor(ClientData player) {
+            contributors.add(player);
+        }
+
+        public Pot SplitVal(ClientData player, int partialBet) {
+            Pot pot = new Pot(pot_val - partialBet);
+            for (ClientData contributor : contributors) {
+                pot.addContributor(contributor);
+            }
+            pot_val = partialBet;
+            contributors.add(player);
+            return pot;
+        }
+
+        public final Set<ClientData> contributors;
+        public int pot_val;
+
+    }
 
 
 }
