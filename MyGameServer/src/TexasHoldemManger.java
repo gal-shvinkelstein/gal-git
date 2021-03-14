@@ -9,6 +9,7 @@ public class TexasHoldemManger implements IGamesManager{
         game_step = 0;
         in_hand_counter = 0;
         curr_in_hand = 1;
+        massage_or_action = 0;
         m_active_players = new HashMap<>();
         next_turn = new Vector<>();
         opener.curr_game_score = 2500; // default buy in
@@ -22,7 +23,7 @@ public class TexasHoldemManger implements IGamesManager{
         game_deck = new Deck();
         game_deck.shuffle();
 
-        //creating pot
+
 
     }
     @Override
@@ -51,15 +52,33 @@ public class TexasHoldemManger implements IGamesManager{
     public MsgHeader Next(MsgHeader last_move)
     {
         MsgHeader ret = new MsgHeader();
-        if(game_step == 0)
+        ret.req_type = ReqType.PlayNext;
+        ret.usr_Id = next_turn.get(player_turn_index).id;
+
+        if(game_step == 0) // dealing cards
         {
             StartNewRound();
             ret.buffer = DealNextHand();
-            ret.usr_Id = next_turn.get(player_turn_index).id;
             ret.game_status = 0;
             ++in_hand_counter;
+        }
+        if(game_step == 1) // placing first bet
+        {
+            if(massage_or_action == 0)
+            {
+                //asking next turn to take an action
+                massage_or_action = 1;
+                ++in_hand_counter;
+            }
+            else
+            {
+                //check last move action + update pot data
+                //update all players
+                massage_or_action = 0;
+            }
 
         }
+
 
 
         if(in_hand_counter == curr_in_hand)
@@ -68,7 +87,7 @@ public class TexasHoldemManger implements IGamesManager{
             in_hand_counter = 0;
         }
 
-
+        player_turn_index = (player_turn_index + 1) % next_turn.size(); // update according to contributors
         return ret;
     }
 
@@ -87,6 +106,7 @@ public class TexasHoldemManger implements IGamesManager{
     }
     private void StartNewRound()
     {
+        curr_pot.clear();
         curr_pot.contributors.addAll(next_turn);
 
         //updating in hand
@@ -120,13 +140,14 @@ public class TexasHoldemManger implements IGamesManager{
     private int in_hand_counter;
     private int curr_in_hand;
     private Pot curr_pot;
+    private int massage_or_action;
 
 
     public static class Pot
     {
         public Pot(int initial_val)
         {
-
+            this.curr_bet = initial_val;
             contributors = new HashSet<>();
         }
         public void clear() {
@@ -138,7 +159,7 @@ public class TexasHoldemManger implements IGamesManager{
         }
 
         public Pot SplitVal(ClientData player, int partialBet) {
-            Pot pot = new Pot(pot_val - partialBet);
+            Pot pot = new Pot(curr_bet - partialBet);
             for (ClientData contributor : contributors) {
                 pot.addContributor(contributor);
             }
@@ -146,9 +167,29 @@ public class TexasHoldemManger implements IGamesManager{
             contributors.add(player);
             return pot;
         }
-
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.valueOf(curr_bet));
+            sb.append(": {");
+            boolean isFirst = true;
+            for (ClientData contributor : contributors) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(contributor.id);
+            }
+            sb.append('}');
+            sb.append(" (Total: ");
+            sb.append(String.valueOf(pot_val));
+            sb.append(')');
+            return sb.toString();
+        }
         public final Set<ClientData> contributors;
-        public int pot_val;
+        private int pot_val;
+        private int curr_bet;
 
     }
 
