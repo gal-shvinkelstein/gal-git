@@ -114,7 +114,7 @@ public class Lobby
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
         //check results
-        if(ret.game_status != 2) {
+        if(ret.game_status != 2 && ret.game_status != 200) {
             System.out.println(" next turn id: " + ret.usr_Id);
             m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
         }
@@ -129,6 +129,10 @@ public class Lobby
                     e.printStackTrace();
                 }
             });
+            if (ret.game_status == 200)
+            {
+                Next(last_turn);
+            }
 
         }
     }

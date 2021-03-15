@@ -1,5 +1,6 @@
 //package Poker;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TexasHoldemManger implements IGamesManager{
     public TexasHoldemManger(ClientData opener)
@@ -62,34 +63,60 @@ public class TexasHoldemManger implements IGamesManager{
             ret.buffer = DealNextHand();
             ret.game_status = 0;
             ++in_hand_counter;
+            player_turn_index = (player_turn_index + 1) % next_turn.size();
         }
         if(game_step == 1) // placing first bet
         {
             if (massage_or_action == 0)
             {
                 ret.game_status = 100;
-                ret.buffer = Action.Type.SmallBlinds;
                 //small blind
-                if(next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex + 1).id) {
-                    //big blind
-                    massage_or_action = 1;
+                if(next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex).id)
+                {
+                    ret.buffer = Action.Type.SmallBlinds;
+                    ret.quantity_param = SmallBlind;
+                    new Action(Action.Type.SmallBlinds,SmallBlind);
                 }
+                else {
+                    //big blind
+                    ret.buffer = Action.Type.BigBlinds;
+                    ret.quantity_param = SmallBlind * 2;
+                    new Action(Action.Type.BigBlinds, SmallBlind * 2);
+
+                    massage_or_action = 2;
+                }
+                player_turn_index = (player_turn_index + 1) % next_turn.size();
             }
             else if(massage_or_action == 1)
             {
                 //asking next turn to take an action
                 ret.game_status = 100; // 100 - take an action, client read instruction
-                massage_or_action = 1;
+                int curr_bet = 0;
+                for(Pot pot : pots)
+                {
+                    curr_bet += pot.GetCurrBet();
+                }
+                ret.game_manger_msg = "Curr bet is:  " + curr_bet;
+                massage_or_action = 2;
                 ++in_hand_counter;
+                player_turn_index = (player_turn_index + 1) % next_turn.size();
             }
             else
             {
                 //check last move action + update pot data
+                Action.Type type = (Action.Type) last_move.buffer;
+                new Action(type,last_move.quantity_param);
                 //update all players
                 ret.game_status = 200; // client read massage
-                massage_or_action = 0;
+                ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
+                massage_or_action = 1;
             }
 
+        }
+        if (game_step == 2) // flop
+        {
+            // creating string table;
+            ret.game_manger_msg = game_deck.deal().toString() + " " + game_deck.deal().toString() + " "  + game_deck.deal().toString();
         }
 
 
@@ -104,7 +131,7 @@ public class TexasHoldemManger implements IGamesManager{
             }
         }
 
-        player_turn_index = (player_turn_index + 1) % next_turn.size(); // update according to contributors
+         // update according to contributors
         return ret;
     }
 
@@ -126,7 +153,8 @@ public class TexasHoldemManger implements IGamesManager{
         player_turn_index = SmallBlindIndex;
         pots.forEach((n) -> n.Clear());
         pots.get(0).contributors.addAll(next_turn);
-        //next_turn.
+        game_deck.reset();
+        game_deck.shuffle();
 
         //updating in hand
     }
@@ -177,6 +205,10 @@ public class TexasHoldemManger implements IGamesManager{
         public void addContributor(ClientData player) {
             contributors.add(player);
         }
+        public int GetCurrBet()
+        {
+            return curr_bet;
+        }
 
         public Pot SplitVal(ClientData player, int partialBet) {
             Pot pot = new Pot(curr_bet - partialBet);
@@ -214,34 +246,30 @@ public class TexasHoldemManger implements IGamesManager{
     }
     public static class Action
     {
-        public Action()
+        public Action(Type act,int bet)
         {
-
+            //calling the proper action
         }
 
-        private enum Type{
+        public enum Type{
             SmallBlinds,
             BigBlinds,
             Call,
             Bet,
             AllIn,
-            Fold
+            Fold,
+            Continue
         }
 
-        public void Small()
+        private void Small(int small_blind)
         {
 
         }
-        public void Big()
+        private void Big(int big_blind)
         {
 
         }
 
-
-
-
-
-        private Map<Type, Runnable> m_commands;
     }
 
 

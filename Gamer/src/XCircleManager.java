@@ -51,7 +51,7 @@ public class XCircleManager implements IGamesClients{
 
     @Override
     public void DisplayResults(MsgHeader ret) {
-        System.out.println(ret.winning_msg);
+        System.out.println(ret.game_manger_msg);
         int[] curr_board = (int[]) ret.buffer;
         int count = 0;
         char c;

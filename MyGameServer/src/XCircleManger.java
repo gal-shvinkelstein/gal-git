@@ -59,7 +59,7 @@ public class XCircleManger implements IGamesManager{
         if(status != 0)
         {
             ret.game_status = 2;
-            ret.winning_msg = "The winner is: " + next_turn[status - 1];
+            ret.game_manger_msg = "The winner is: " + next_turn[status - 1];
             ret.buffer = board;
         }
         ret.req_type = ReqType.PlayNext;
