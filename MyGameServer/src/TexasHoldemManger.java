@@ -4,12 +4,14 @@ import java.util.*;
 public class TexasHoldemManger implements IGamesManager{
     public TexasHoldemManger(ClientData opener)
     {
+        pots = new ArrayList<Pot>();
         joined_num = 0;
         player_turn_index = 0;
         game_step = 0;
         in_hand_counter = 0;
         curr_in_hand = 1;
         massage_or_action = 0;
+        SmallBlindIndex = 0;
         m_active_players = new HashMap<>();
         next_turn = new Vector<>();
         opener.curr_game_score = 2500; // default buy in
@@ -18,7 +20,6 @@ public class TexasHoldemManger implements IGamesManager{
 
         next_turn.set(joined_num++, opener);
 
-        curr_pot = new Pot(0);
 
         game_deck = new Deck();
         game_deck.shuffle();
@@ -64,9 +65,20 @@ public class TexasHoldemManger implements IGamesManager{
         }
         if(game_step == 1) // placing first bet
         {
-            if(massage_or_action == 0)
+            if (massage_or_action == 0)
+            {
+                ret.game_status = 100;
+                ret.buffer = Action.Type.SmallBlinds;
+                //small blind
+                if(next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex + 1).id) {
+                    //big blind
+                    massage_or_action = 1;
+                }
+            }
+            else if(massage_or_action == 1)
             {
                 //asking next turn to take an action
+                ret.game_status = 100; // 100 - take an action, client read instruction
                 massage_or_action = 1;
                 ++in_hand_counter;
             }
@@ -74,6 +86,7 @@ public class TexasHoldemManger implements IGamesManager{
             {
                 //check last move action + update pot data
                 //update all players
+                ret.game_status = 200; // client read massage
                 massage_or_action = 0;
             }
 
@@ -85,6 +98,10 @@ public class TexasHoldemManger implements IGamesManager{
         {
             game_step = (game_step + 1) % NumOfGameSteps;
             in_hand_counter = 0;
+            if(game_step == 0)
+            {
+                ++SmallBlindIndex;
+            }
         }
 
         player_turn_index = (player_turn_index + 1) % next_turn.size(); // update according to contributors
@@ -106,8 +123,10 @@ public class TexasHoldemManger implements IGamesManager{
     }
     private void StartNewRound()
     {
-        curr_pot.clear();
-        curr_pot.contributors.addAll(next_turn);
+        player_turn_index = SmallBlindIndex;
+        pots.forEach((n) -> n.Clear());
+        pots.get(0).contributors.addAll(next_turn);
+        //next_turn.
 
         //updating in hand
     }
@@ -130,6 +149,7 @@ public class TexasHoldemManger implements IGamesManager{
 
     private final int NumOfGameSteps = 9;
     private final int SmallBlind = 5;
+    private int SmallBlindIndex;
     private int game_step;
     private Vector<ClientData> next_turn;
     private int player_turn_index;
@@ -139,7 +159,7 @@ public class TexasHoldemManger implements IGamesManager{
     private HashMap<Integer, ClientData > m_active_players;
     private int in_hand_counter;
     private int curr_in_hand;
-    private Pot curr_pot;
+    private final List<Pot> pots;
     private int massage_or_action;
 
 
@@ -150,7 +170,7 @@ public class TexasHoldemManger implements IGamesManager{
             this.curr_bet = initial_val;
             contributors = new HashSet<>();
         }
-        public void clear() {
+        public void Clear() {
             pot_val = 0;
             contributors.clear();
         }
@@ -191,6 +211,37 @@ public class TexasHoldemManger implements IGamesManager{
         private int pot_val;
         private int curr_bet;
 
+    }
+    public static class Action
+    {
+        public Action()
+        {
+
+        }
+
+        private enum Type{
+            SmallBlinds,
+            BigBlinds,
+            Call,
+            Bet,
+            AllIn,
+            Fold
+        }
+
+        public void Small()
+        {
+
+        }
+        public void Big()
+        {
+
+        }
+
+
+
+
+
+        private Map<Type, Runnable> m_commands;
     }
 
 
