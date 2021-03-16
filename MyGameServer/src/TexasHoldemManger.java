@@ -42,12 +42,18 @@ public class TexasHoldemManger implements IGamesManager{
     @Override
     public void RestartGame()
     {
-
+        StartNewRound();
     }
     @Override
     public void LeaveGame(ClientData leaver)
     {
         //cash out...
+        if(game_step != 0) {
+            MsgHeader ret = new MsgHeader();
+            ret.usr_Id = leaver.id;
+            ret.req_type = ReqType.LeaveGame;
+            Next(ret);
+        }
 
         m_active_players.remove(leaver.id);
     }
@@ -94,23 +100,30 @@ public class TexasHoldemManger implements IGamesManager{
             }
 
         }
-        if (game_step == 2) // flop
+        else if (game_step == 2) // flop
         {
             // creating string table;
             game_deck.deal(); // burned card
             board.add(game_deck.deal());
             board.add(game_deck.deal());
             board.add(game_deck.deal());
-            ret.game_manger_msg = board.get(0).toString() + " " + board.get(1).toString() + " "  + board.get(2).toString();
+//            ret.game_manger_msg = board.get(0).toString() + " " + board.get(1).toString() + " "  + board.get(2).toString();
+            ret.game_manger_msg = board.stream().map(Objects::toString).collect(Collectors.joining(", "));
             ret.game_status = 200;
             game_step++;
         }
-        if(game_step == 3) // bet round after flop
+        else if(game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
         {
             ret = BettingRound(last_move);
         }
+        else if(game_step == 4 || game_step == 6) // deal turn or river
+        {
+            ret = DealOneToBoard();
+        }
+        else
+        {
 
-
+        }
 
         if(in_hand_counter == curr_in_hand)
         {
@@ -119,6 +132,7 @@ public class TexasHoldemManger implements IGamesManager{
             player_turn_index = next_turn.indexOf(pots.get(0).contributors.stream().findAny());
             if(game_step == 0)
             {
+                ret = RoundResult();
                 ++SmallBlindIndex;
             }
         }
@@ -154,15 +168,33 @@ public class TexasHoldemManger implements IGamesManager{
             ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
             massage_or_action = 1;
         }
+        curr_in_hand = pots.get(0).contributors.size();
+        if(curr_in_hand == 1)
+        {
+            ret = RoundResult();
+        }
         return ret;
     }
 
+    private MsgHeader DealOneToBoard()
+    {
+        MsgHeader ret = new MsgHeader();
+        game_deck.deal(); // burned card
+        board.add(game_deck.deal());
+        ret.game_manger_msg = board.stream().map(Objects::toString).collect(Collectors.joining(", "));
+        ret.game_status = 200;
+        game_step++;
+        return ret;
+    }
 
     private MsgHeader RoundResult() //refer to round results
     {
         MsgHeader ret = new MsgHeader();
+        game_step = 0;
+        ++SmallBlindIndex;
+        in_hand_counter = 0;
 
-
+        //calculate results;
 
         return ret;
     }
@@ -293,8 +325,8 @@ public class TexasHoldemManger implements IGamesManager{
             Call,
             Bet,
             AllIn,
-            Fold,
-            Continue
+            Fold, //update contributors
+            Continue //update contributors next_turn in case of leaving
         }
 
         private void Small(int small_blind)
