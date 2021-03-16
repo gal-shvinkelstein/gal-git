@@ -193,8 +193,27 @@ public class TexasHoldemManger implements IGamesManager{
         game_step = 0;
         ++SmallBlindIndex;
         in_hand_counter = 0;
+        ret.game_status = 2;
+        int total_pot = 0;
+        for(Pot pot : pots)
+        {
+            total_pot += pot.GetPotVal();
+        }
 
-        //calculate results;
+        if(curr_in_hand > 1)
+        {
+            //calculate results
+        }
+        else
+        {
+            Optional<ClientData> winner = pots.get(0).contributors.stream().findAny();
+
+            ret.game_manger_msg = "pot winner is: " + winner.get().id + " pot value is: " + total_pot;
+            ret.usr_Id = winner.get().id;
+            ret.quantity_param = total_pot;
+        }
+
+
 
         return ret;
     }
@@ -241,7 +260,7 @@ public class TexasHoldemManger implements IGamesManager{
         return m_active_players;
     }
 
-    private final int NumOfGameSteps = 9;
+    private final int NumOfGameSteps = 7;
     private final int SmallBlind = 5;
     private int SmallBlindIndex;
     private int game_step;
@@ -276,6 +295,10 @@ public class TexasHoldemManger implements IGamesManager{
         public int GetCurrBet()
         {
             return curr_bet;
+        }
+        public int GetPotVal()
+        {
+            return pot_val;
         }
 
         public Pot SplitVal(ClientData player, int partialBet) {
