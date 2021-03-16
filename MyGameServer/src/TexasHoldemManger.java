@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 public class TexasHoldemManger implements IGamesManager{
     public TexasHoldemManger(ClientData opener)
     {
-        pots = new ArrayList<Pot>();
+        pots = new ArrayList<>();
         joined_num = 0;
         player_turn_index = 0;
         game_step = 0;
@@ -18,6 +18,7 @@ public class TexasHoldemManger implements IGamesManager{
         opener.curr_game_score = 2500; // default buy in
         opener.curr_status = 1; // wait for next hand
         m_active_players.put(opener.id,opener);
+        board = new ArrayList<>();
 
         next_turn.set(joined_num++, opener);
 
@@ -64,6 +65,7 @@ public class TexasHoldemManger implements IGamesManager{
             ret.game_status = 0;
             ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
+            //todo: saving each player hand data
         }
         if(game_step == 1) // placing first bet
         {
@@ -87,36 +89,25 @@ public class TexasHoldemManger implements IGamesManager{
                 }
                 player_turn_index = (player_turn_index + 1) % next_turn.size();
             }
-            else if(massage_or_action == 1)
-            {
-                //asking next turn to take an action
-                ret.game_status = 100; // 100 - take an action, client read instruction
-                int curr_bet = 0;
-                for(Pot pot : pots)
-                {
-                    curr_bet += pot.GetCurrBet();
-                }
-                ret.game_manger_msg = "Curr bet is:  " + curr_bet;
-                massage_or_action = 2;
-                ++in_hand_counter;
-                player_turn_index = (player_turn_index + 1) % next_turn.size();
-            }
-            else
-            {
-                //check last move action + update pot data
-                Action.Type type = (Action.Type) last_move.buffer;
-                new Action(type,last_move.quantity_param);
-                //update all players
-                ret.game_status = 200; // client read massage
-                ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
-                massage_or_action = 1;
+            else {
+                ret = BettingRound(last_move);
             }
 
         }
         if (game_step == 2) // flop
         {
             // creating string table;
-            ret.game_manger_msg = game_deck.deal().toString() + " " + game_deck.deal().toString() + " "  + game_deck.deal().toString();
+            game_deck.deal(); // burned card
+            board.add(game_deck.deal());
+            board.add(game_deck.deal());
+            board.add(game_deck.deal());
+            ret.game_manger_msg = board.get(0).toString() + " " + board.get(1).toString() + " "  + board.get(2).toString();
+            ret.game_status = 200;
+            game_step++;
+        }
+        if(game_step == 3) // bet round after flop
+        {
+            ret = BettingRound(last_move);
         }
 
 
@@ -125,6 +116,7 @@ public class TexasHoldemManger implements IGamesManager{
         {
             game_step = (game_step + 1) % NumOfGameSteps;
             in_hand_counter = 0;
+            player_turn_index = next_turn.indexOf(pots.get(0).contributors.stream().findAny());
             if(game_step == 0)
             {
                 ++SmallBlindIndex;
@@ -134,6 +126,37 @@ public class TexasHoldemManger implements IGamesManager{
          // update according to contributors
         return ret;
     }
+
+    private MsgHeader BettingRound(MsgHeader last_move)
+    {
+        MsgHeader ret = new MsgHeader();
+        if(massage_or_action == 1)
+        {
+            //asking next turn to take an action
+            ret.game_status = 100; // 100 - take an action, client read instruction
+            int curr_bet = 0;
+            for(Pot pot : pots)
+            {
+                curr_bet += pot.GetCurrBet();
+            }
+            ret.game_manger_msg = "Curr bet is:  " + curr_bet;
+            massage_or_action = 2;
+            ++in_hand_counter;
+            player_turn_index = (player_turn_index + 1) % next_turn.size();
+        }
+        else
+        {
+            //check last move action + update pot data
+            Action.Type type = (Action.Type) last_move.buffer;
+            new Action(type,last_move.quantity_param);
+            //update all players
+            ret.game_status = 200; // client read massage
+            ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
+            massage_or_action = 1;
+        }
+        return ret;
+    }
+
 
     private MsgHeader RoundResult() //refer to round results
     {
@@ -152,7 +175,19 @@ public class TexasHoldemManger implements IGamesManager{
     {
         player_turn_index = SmallBlindIndex;
         pots.forEach((n) -> n.Clear());
-        pots.get(0).contributors.addAll(next_turn);
+        int counter = next_turn.size();
+        int i;
+        for(i = SmallBlindIndex; i < next_turn.size(); ++i)
+        {
+            --counter;
+            pots.get(0).contributors.add(next_turn.get(i));
+        }
+        i = 0;
+        while (counter != 0)
+        {
+            pots.get(0).contributors.add(next_turn.get(i));
+            ++i;
+        }
         game_deck.reset();
         game_deck.shuffle();
 
@@ -189,6 +224,8 @@ public class TexasHoldemManger implements IGamesManager{
     private int curr_in_hand;
     private final List<Pot> pots;
     private int massage_or_action;
+    private final List<Card> board;
+
 
 
     public static class Pot
