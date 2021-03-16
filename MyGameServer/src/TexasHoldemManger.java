@@ -187,11 +187,10 @@ public class TexasHoldemManger implements IGamesManager{
         {
             pots.get(0).contributors.add(next_turn.get(i));
             ++i;
+            --counter;
         }
         game_deck.reset();
         game_deck.shuffle();
-
-        //updating in hand
     }
 
     @Override
