@@ -324,7 +324,7 @@ public class TexasHoldemManger implements IGamesManager {
             Continue //update contributors next_turn in case of leaving
         }
 
-        public void Do(ClientData player,int bet);
+        void Do(ClientData player, int bet);
 
     }
 
@@ -344,46 +344,69 @@ public class TexasHoldemManger implements IGamesManager {
 
     public class SmallA implements Action {
         public void Do(ClientData player, int bet) {
-
+            pots.get(0).pot_val = bet;
+            player.curr_game_score -= bet;
         }
     }
 
     public class BigA implements Action {
         public void Do(ClientData player, int bet) {
-
+            pots.get(0).pot_val += bet;
+            pots.get(0).curr_bet = bet;
+            player.curr_game_score -= bet;
         }
     }
 
     public class CallA implements Action {
         public void Do(ClientData player, int bet) {
-
+            for(Pot pot : pots) {
+                //place partial bet in each pot
+                //update pot val
+                //update pot curr bet
+            }
+            player.curr_game_score -= bet;
         }
     }
 
     public class BetA implements Action {
         public void Do(ClientData player, int bet) {
-
+            for(Pot pot : pots) {
+                //place partial bet in each pot
+                //update pot val
+                //update pot curr bet
+            }
+            player.curr_game_score -= bet;
         }
 
     }
 
     public class AllInA implements Action {
         public void Do(ClientData player, int bet) {
-
+            for(Pot pot : pots) {
+                //place partial bet in each pot
+                //update pot val
+                //update pot curr bet
+            }
+            player.curr_game_score = 0;
         }
 
     }
 
     public class FoldA implements Action {
         public void Do(ClientData player, int bet) {
-
+            for(Pot pot : pots) {
+                pot.contributors.remove(player);
+            }
         }
 
     }
 
     public class ContinueA implements Action {
         public void Do(ClientData player, int bet) {
-
+            next_turn.remove(player);
+            for(Pot pot : pots) {
+                pot.contributors.remove(player);
+            }
         }
 
     }
