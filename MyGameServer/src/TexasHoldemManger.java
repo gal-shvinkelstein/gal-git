@@ -320,6 +320,7 @@ public class TexasHoldemManger implements IGamesManager {
             Call,
             Bet,
             AllIn,
+            Check,
             Fold, //update contributors
             Continue //update contributors next_turn in case of leaving
         }
@@ -336,6 +337,7 @@ public class TexasHoldemManger implements IGamesManager {
                 case Call -> new CallA();
                 case Bet -> new BetA();
                 case AllIn -> new AllInA();
+                case Check -> new CheckA();
                 case Fold -> new FoldA();
                 case Continue -> new ContinueA();
             };
@@ -376,10 +378,17 @@ public class TexasHoldemManger implements IGamesManager {
                 //update pot curr bet
             }
             player.curr_game_score -= bet;
+            in_hand_counter = 1;
         }
 
     }
 
+    public class CheckA implements Action {
+        public void Do(ClientData player, int bet) {
+
+        }
+
+    }
     public class AllInA implements Action {
         public void Do(ClientData player, int bet) {
             for(Pot pot : pots) {
@@ -410,6 +419,7 @@ public class TexasHoldemManger implements IGamesManager {
         }
 
     }
+
 }
 
 
