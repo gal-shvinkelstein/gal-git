@@ -19,6 +19,7 @@ public class TexasHoldemManger implements IGamesManager {
         m_active_players.put(opener.id, opener);
         board = new ArrayList<>();
         doActionFactory = new DoAction();
+        all_in_counter = 0;
 
         next_turn.set(joined_num++, opener);
 
@@ -66,11 +67,13 @@ public class TexasHoldemManger implements IGamesManager {
         if (game_step == 0) // dealing cards
         {
             StartNewRound();
-            ret.buffer = DealNextHand();
+            List<Card> next = DealNextHand();
+            ret.buffer = next;
             ret.game_status = 0;
             ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
-            //todo: saving each player hand data
+            Hand newHand = new Hand(next);
+            players_hand.put(ret.usr_Id,newHand);
         }
         if (game_step == 1) // placing first bet
         {
@@ -109,8 +112,19 @@ public class TexasHoldemManger implements IGamesManager {
             game_step++;
         } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
         {
-            ret = BettingRound(last_move);
-        } else if (game_step == 4 || game_step == 6) // deal turn or river
+            if ((in_hand_counter - all_in_counter) > 1) {
+                ret = BettingRound(last_move);
+            }
+            else if(game_step == 7)
+            {
+                ret = RoundResult();
+            }
+            else
+            {
+                ++game_step;
+            }
+        }
+        if (game_step == 4 || game_step == 6) // deal turn or river
         {
             ret = DealOneToBoard();
         }
@@ -129,7 +143,6 @@ public class TexasHoldemManger implements IGamesManager {
             }
         }
 
-        // update according to contributors
         return ret;
     }
 
@@ -186,7 +199,40 @@ public class TexasHoldemManger implements IGamesManager {
         }
 
         if (curr_in_hand > 1) {
-            //calculate results
+            pots.get(0).contributors.forEach((k) -> players_hand.get(k.id).addCards(board));
+            ret.usr_Id = 0;
+            HashMap<Integer,Integer> winners = new HashMap<>();
+            Vector<Integer> tmp_winners = new Vector<>();
+            int max_val = 0;
+            for (Pot pot : pots) {
+               for(ClientData clientData : pot.contributors) {
+                   HandEvaluator handEvaluator = new HandEvaluator(players_hand.get(clientData.id));
+                   if(max_val < handEvaluator.value)
+                   {
+                       tmp_winners.clear();
+                       tmp_winners.add(clientData.id);
+                       max_val = handEvaluator.value;
+                   }
+                   else if(max_val == handEvaluator.value)
+                   {
+                       tmp_winners.add(clientData.id);
+                   }
+               }
+               int pot_share = pot.pot_val / tmp_winners.size();
+               for (int i : tmp_winners)
+               {
+                   if(winners.containsKey(i))
+                   {
+                       winners.put(i,winners.get(i) + pot_share);
+                   }
+                   else
+                   {
+                       winners.put(i,pot_share);
+                   }
+               }
+            }
+            ret.buffer = winners;
+            //send display of the winnings hand
         } else {
             Optional<ClientData> winner = pots.get(0).contributors.stream().findAny();
 
@@ -258,6 +304,8 @@ public class TexasHoldemManger implements IGamesManager {
     private int massage_or_action;
     private final List<Card> board;
     private DoAction doActionFactory;
+    private int all_in_counter;
+    private HashMap<Integer,Hand> players_hand;
 
     public static class Pot {
         public Pot(int initial_val) {
@@ -420,11 +468,10 @@ public class TexasHoldemManger implements IGamesManager {
     public class AllInA implements Action {
         public void Do(ClientData player, int bet) {
             int chips = m_active_players.get(player.id).curr_game_score;
-            int gap = 0;
             for(Pot pot : pots) {
                 if(chips >= pot.curr_bet)
                 {
-                    gap = chips - pot.curr_bet;
+                    int gap = chips - pot.curr_bet;
                     pot.players_curr_pot_invest.put(player.id,pot.players_curr_pot_invest.get(player.id) + gap);
                     chips -= gap;
                     pot.pot_val += gap;
@@ -441,6 +488,7 @@ public class TexasHoldemManger implements IGamesManager {
                 pots.get(pots.size() -1).pot_val += chips;
             }
             m_active_players.get(player.id).curr_game_score = 0;
+            all_in_counter++;
         }
 
     }
@@ -465,7 +513,458 @@ public class TexasHoldemManger implements IGamesManager {
         }
 
     }
+    public class Hand {
 
+        private static final int MAX_NO_OF_CARDS = 7;
+        private Card[] cards = new Card[MAX_NO_OF_CARDS];
+        private int noOfCards = 0;
+
+        public Hand() {
+            // Empty implementation.
+        }
+
+        public Hand(List<Card> cards) {
+            addCards(cards);
+        }
+
+        public int size() {
+            return noOfCards;
+        }
+
+        public void addCard(Card card) {
+            if (card == null) {
+                throw new IllegalArgumentException("Null card");
+            }
+
+            int insertIndex = -1;
+            for (int i = 0; i < noOfCards; i++) {
+                if (card.compareTo(cards[i]) > 0) {
+                    insertIndex = i;
+                    break;
+                }
+            }
+            if (insertIndex == -1) {
+                // Could not insert anywhere, so append at the end.
+                cards[noOfCards++] = card;
+            } else {
+                for (int i = noOfCards; i > insertIndex; i--) {
+                    cards[i] = cards[i - 1];
+                }
+                cards[insertIndex] = card;
+                noOfCards++;
+            }
+        }
+
+        public void addCards(List<Card> cards) {
+            if (cards == null) {
+                throw new IllegalArgumentException("Null array");
+            }
+            if (cards.size() > MAX_NO_OF_CARDS) {
+                throw new IllegalArgumentException("Too many cards");
+            }
+            for (Card card : cards) {
+                addCard(card);
+            }
+        }
+
+        public Card[] getCards() {
+            Card[] dest = new Card[noOfCards];
+            System.arraycopy(cards, 0, dest, 0, noOfCards);
+            return dest;
+        }
+
+
+        public void removeAllCards() {
+            noOfCards = 0;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < noOfCards; i++) {
+                sb.append(cards[i]);
+                if (i < (noOfCards - 1)) {
+                    sb.append(' ');
+                }
+            }
+            return sb.toString();
+        }
+
+    }
+
+    public static class HandEvaluator {
+        public enum HandValueType {
+            ROYAL_FLUSH("a Royal Flush", 9),
+            STRAIGHT_FLUSH("a Straight Flush", 8),
+            FOUR_OF_A_KIND("Four of a Kind", 7),
+            FULL_HOUSE("a Full House", 6),
+            FLUSH("a Flush", 5),
+            STRAIGHT("a Straight", 4),
+            THREE_OF_A_KIND("Three of a Kind", 3),
+            TWO_PAIRS("Two Pairs", 2),
+            ONE_PAIR("One Pair", 1),
+            HIGH_CARD("a High Card", 0),
+            ;
+            private String description;
+            private int value;
+
+            HandValueType(String description, int value) {
+                this.description = description;
+                this.value = value;
+            }
+            public String getDescription() {
+                return description;
+            }
+            public int getValue() {
+                return value;
+            }
+
+        }
+
+        private static final int NO_OF_RANKINGS  = 6;
+        private static final int MAX_NO_OF_PAIRS = 2;
+        /** The ranking factors (powers of 13, the number of ranks). */
+        private static final int[] RANKING_FACTORS = {371293, 28561, 2197, 169, 13, 1};
+        private HandValueType type;
+        private int value = 0;
+        private final Card[] cards;
+        private int[] rankDist = new int[Card.NO_OF_RANKS];
+        private int[] suitDist = new int[Card.NO_OF_SUITS];
+        private int noOfPairs = 0;
+        private int[] pairs = new int[MAX_NO_OF_PAIRS];
+        private int flushSuit = -1;
+        private int flushRank = -1;
+        private int straightRank = -1;
+        private boolean wheelingAce = false;
+        private int tripleRank = -1;
+        private int quadRank = -1;
+        private int[] rankings = new int[NO_OF_RANKINGS];
+
+        public HandEvaluator(Hand hand) {
+            cards = hand.getCards();
+
+            // Find patterns.
+            calculateDistributions();
+            findStraight();
+            findFlush();
+            findDuplicates();
+
+            // Find special values.
+            boolean isSpecialValue =
+                    (isStraightFlush() ||
+                            isFourOfAKind()   ||
+                            isFullHouse()     ||
+                            isFlush()         ||
+                            isStraight()      ||
+                            isThreeOfAKind()  ||
+                            isTwoPairs()      ||
+                            isOnePair());
+            if (!isSpecialValue) {
+                calculateHighCard();
+            }
+
+            // Calculate value.
+            for (int i = 0; i < NO_OF_RANKINGS; i++) {
+                value += rankings[i] * RANKING_FACTORS[i];
+            }
+        }
+
+        public HandValueType getType() {
+            return type;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        private void calculateDistributions() {
+            for (Card card : cards) {
+                rankDist[card.getRank()]++;
+                suitDist[card.getSuit()]++;
+            }
+        }
+
+        private void findFlush() {
+            for (int i = 0; i < Card.NO_OF_SUITS; i++) {
+                if (suitDist[i] >= 5) {
+                    flushSuit = i;
+                    for (Card card : cards) {
+                        if (card.getSuit() == flushSuit) {
+                            if (!wheelingAce || card.getRank() != Card.ACE) {
+                                flushRank = card.getRank();
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void findStraight() {
+            boolean inStraight = false;
+            int rank = -1;
+            int count = 0;
+            for (int i = Card.NO_OF_RANKS - 1; i >= 0 ; i--) {
+                if (rankDist[i] == 0) {
+                    inStraight = false;
+                    count = 0;
+                } else {
+                    if (!inStraight) {
+                        // First card of the potential Straight.
+                        inStraight = true;
+                        rank = i;
+                    }
+                    count++;
+                    if (count >= 5) {
+                        // Found a Straight!
+                        straightRank = rank;
+                        break;
+                    }
+                }
+            }
+            // Special case for the 'Steel Wheel' (Five-high Straight with a 'wheeling Ace') .
+            if ((count == 4) && (rank == Card.FIVE) && (rankDist[Card.ACE] > 0)) {
+                wheelingAce = true;
+                straightRank = rank;
+            }
+        }
+
+        private void findDuplicates() {
+            // Find quads, triples and pairs.
+            for (int i = Card.NO_OF_RANKS - 1; i >= 0 ; i--) {
+                if (rankDist[i] == 4) {
+                    quadRank = i;
+                } else if (rankDist[i] == 3) {
+                    tripleRank = i;
+                } else if (rankDist[i] == 2) {
+                    if (noOfPairs < MAX_NO_OF_PAIRS) {
+                        pairs[noOfPairs++] = i;
+                    }
+                }
+            }
+        }
+
+        private void calculateHighCard() {
+            type = HandValueType.HIGH_CARD;
+            rankings[0] = type.getValue();
+            // Get the five highest ranks.
+            int index = 1;
+            for (Card card : cards) {
+                rankings[index++] = card.getRank();
+                if (index > 5) {
+                    break;
+                }
+            }
+        }
+
+        private boolean isOnePair() {
+            if (noOfPairs == 1) {
+                type = HandValueType.ONE_PAIR;
+                rankings[0] = type.getValue();
+                // Get the rank of the pair.
+                int pairRank = pairs[0];
+                rankings[1] = pairRank;
+                // Get the three kickers.
+                int index = 2;
+                for (Card card : cards) {
+                    int rank = card.getRank();
+                    if (rank != pairRank) {
+                        rankings[index++] = rank;
+                        if (index > 4) {
+                            // We don't need any more kickers.
+                            break;
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isTwoPairs() {
+            if (noOfPairs == 2) {
+                type = HandValueType.TWO_PAIRS;
+                rankings[0] = type.getValue();
+                // Get the value of the high and low pairs.
+                int highRank = pairs[0];
+                int lowRank  = pairs[1];
+                rankings[1] = highRank;
+                rankings[2] = lowRank;
+                // Get the kicker card.
+                for (Card card : cards) {
+                    int rank = card.getRank();
+                    if ((rank != highRank) && (rank != lowRank)) {
+                        rankings[3] = rank;
+                        break;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isThreeOfAKind() {
+            if (tripleRank != -1) {
+                type = HandValueType.THREE_OF_A_KIND;
+                rankings[0] = type.getValue();
+                rankings[1] = tripleRank;
+                // Get the remaining two cards as kickers.
+                int index = 2;
+                for (Card card : cards) {
+                    int rank = card.getRank();
+                    if (rank != tripleRank) {
+                        rankings[index++] = rank;
+                        if (index > 3) {
+                            // We don't need any more kickers.
+                            break;
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isStraight() {
+            if (straightRank != -1) {
+                type = HandValueType.STRAIGHT;
+                rankings[0] = type.getValue();
+                rankings[1] = straightRank;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isFlush() {
+            if (flushSuit != -1) {
+                type = HandValueType.FLUSH;
+                rankings[0] = type.getValue();
+                int index = 1;
+                for (Card card : cards) {
+                    if (card.getSuit() == flushSuit) {
+                        int rank = card.getRank();
+                        if (index == 1) {
+                            flushRank = rank;
+                        }
+                        rankings[index++] = rank;
+                        if (index > 5) {
+                            // We don't need more kickers.
+                            break;
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isFullHouse() {
+            if ((tripleRank != -1) && (noOfPairs > 0)) {
+                type = HandValueType.FULL_HOUSE;
+                rankings[0] = type.getValue();
+                rankings[1] = tripleRank;
+                rankings[2] = pairs[0];
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isFourOfAKind() {
+            if (quadRank != -1) {
+                type = HandValueType.FOUR_OF_A_KIND;
+                rankings[0] = type.getValue();
+                rankings[1] = quadRank;
+                // Get the remaining card as kicker.
+                int index = 2;
+                for (Card card : cards) {
+                    int rank = card.getRank();
+                    if (rank != quadRank) {
+                        rankings[index++] = rank;
+                        break;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private boolean isStraightFlush() {
+            if (straightRank != -1 && flushRank == straightRank) {
+                // Flush and Straight (possibly separate); check for Straight Flush.
+                int straightRank2 = -1;
+                int lastSuit = -1;
+                int lastRank = -1;
+                int inStraight = 1;
+                int inFlush = 1;
+                for (Card card : cards) {
+                    int rank = card.getRank();
+                    int suit = card.getSuit();
+                    if (lastRank != -1) {
+                        int rankDiff = lastRank - rank;
+                        if (rankDiff == 1) {
+                            // Consecutive rank; possible straight!
+                            inStraight++;
+                            if (straightRank2 == -1) {
+                                straightRank2 = lastRank;
+                            }
+                            if (suit == lastSuit) {
+                                inFlush++;
+                            } else {
+                                inFlush = 1;
+                            }
+                            if (inStraight >= 5 && inFlush >= 5) {
+                                // Straight!
+                                break;
+                            }
+                        } else if (rankDiff == 0) {
+                            // Duplicate rank; skip.
+                        } else {
+                            // Non-consecutive; reset.
+                            straightRank2 = -1;
+                            inStraight = 1;
+                            inFlush = 1;
+                        }
+                    }
+                    lastRank = rank;
+                    lastSuit = suit;
+                }
+
+                if (inStraight >= 5 && inFlush >= 5) {
+                    if (straightRank == Card.ACE) {
+                        // Royal Flush.
+                        type = HandValueType.ROYAL_FLUSH;
+                        rankings[0] = type.getValue();
+                        return true;
+                    } else {
+                        // Straight Flush.
+                        type = HandValueType.STRAIGHT_FLUSH;
+                        rankings[0] = type.getValue();
+                        rankings[1] = straightRank2;
+                        return true;
+                    }
+                } else if (wheelingAce && inStraight >= 4 && inFlush >= 4) {
+                    // Steel Wheel (Straight Flush with wheeling Ace).
+                    type = HandValueType.STRAIGHT_FLUSH;
+                    rankings[0] = type.getValue();
+                    rankings[1] = straightRank2;
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+    }
 }
 
 
