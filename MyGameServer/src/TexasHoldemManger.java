@@ -113,14 +113,16 @@ public class TexasHoldemManger implements IGamesManager {
         } else if (game_step == 4 || game_step == 6) // deal turn or river
         {
             ret = DealOneToBoard();
-        } else {
-
         }
-
         if (in_hand_counter == curr_in_hand) {
             game_step = (game_step + 1) % NumOfGameSteps;
             in_hand_counter = 0;
             player_turn_index = next_turn.indexOf(pots.get(0).contributors.stream().findAny());
+            for (Pot pot : pots)
+            {
+                    pot.players_curr_pot_invest.forEach((k,v) ->
+                            pot.players_curr_pot_invest.put(k,pot.players_curr_pot_invest.get(k) - v));
+            }
             if (game_step == 0) {
                 ret = RoundResult();
                 ++SmallBlindIndex;
@@ -205,18 +207,22 @@ public class TexasHoldemManger implements IGamesManager {
     private void StartNewRound() {
         player_turn_index = SmallBlindIndex;
         pots.forEach((n) -> n.Clear());
+        Pot pot = new Pot(SmallBlind * 2);
         int counter = next_turn.size();
         int i;
         for (i = SmallBlindIndex; i < next_turn.size(); ++i) {
             --counter;
-            pots.get(0).contributors.add(next_turn.get(i));
+            pot.contributors.add(next_turn.get(i));
+            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
         }
         i = 0;
         while (counter != 0) {
-            pots.get(0).contributors.add(next_turn.get(i));
+            pot.contributors.add(next_turn.get(i));
+            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
             ++i;
             --counter;
         }
+        pots.add(pot);
         game_deck.reset();
         game_deck.shuffle();
     }
@@ -263,6 +269,7 @@ public class TexasHoldemManger implements IGamesManager {
         public void Clear() {
             pot_val = 0;
             contributors.clear();
+            players_curr_pot_invest.clear();
         }
 
         public void addContributor(ClientData player) {
@@ -278,12 +285,19 @@ public class TexasHoldemManger implements IGamesManager {
         }
 
         public Pot SplitVal(ClientData player, int partialBet) {
-            Pot pot = new Pot(curr_bet - partialBet);
+            int gap = curr_bet - partialBet;
+            Pot pot = new Pot(gap);
             for (ClientData contributor : contributors) {
                 pot.addContributor(contributor);
+                pot.players_curr_pot_invest.put(contributor.id,gap);
+                players_curr_pot_invest.put(contributor.id,players_curr_pot_invest.get(contributor.id) - gap);
             }
-            pot_val = partialBet;
-            contributors.add(player);
+            curr_bet = partialBet;
+            pot_val = curr_bet * contributors.size();
+            pot.contributors.remove(player);
+            pot.players_curr_pot_invest.remove(player.id);
+            pot.pot_val = pot.curr_bet * pot.contributors.size();
+
             return pot;
         }
 
@@ -405,12 +419,28 @@ public class TexasHoldemManger implements IGamesManager {
     }
     public class AllInA implements Action {
         public void Do(ClientData player, int bet) {
+            int chips = m_active_players.get(player.id).curr_game_score;
+            int gap = 0;
             for(Pot pot : pots) {
-                //place partial bet in each pot
-                //update pot val
-                //update pot curr bet
+                if(chips >= pot.curr_bet)
+                {
+                    gap = chips - pot.curr_bet;
+                    pot.players_curr_pot_invest.put(player.id,pot.players_curr_pot_invest.get(player.id) + gap);
+                    chips -= gap;
+                    pot.pot_val += gap;
+                }
+                else
+                {
+                    pots.add(pot.SplitVal(player,chips));
+                }
+
             }
-            player.curr_game_score = 0;
+            if(chips > 0)
+            {
+                pots.get(pots.size() -1).curr_bet += chips;
+                pots.get(pots.size() -1).pot_val += chips;
+            }
+            m_active_players.get(player.id).curr_game_score = 0;
         }
 
     }
@@ -419,6 +449,7 @@ public class TexasHoldemManger implements IGamesManager {
         public void Do(ClientData player, int bet) {
             for(Pot pot : pots) {
                 pot.contributors.remove(player);
+                pot.players_curr_pot_invest.remove(player.id);
             }
         }
 
@@ -429,6 +460,7 @@ public class TexasHoldemManger implements IGamesManager {
             next_turn.remove(player);
             for(Pot pot : pots) {
                 pot.contributors.remove(player);
+                pot.players_curr_pot_invest.remove(player.id);
             }
         }
 
