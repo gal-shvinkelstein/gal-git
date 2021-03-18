@@ -257,6 +257,7 @@ public class TexasHoldemManger implements IGamesManager {
         public Pot(int initial_val) {
             this.curr_bet = initial_val;
             contributors = new HashSet<>();
+            players_curr_pot_invest = new HashMap<>();
         }
 
         public void Clear() {
@@ -310,6 +311,7 @@ public class TexasHoldemManger implements IGamesManager {
         public final Set<ClientData> contributors;
         private int pot_val;
         private int curr_bet;
+        private HashMap<Integer,Integer> players_curr_pot_invest;
 
     }
 
@@ -347,6 +349,7 @@ public class TexasHoldemManger implements IGamesManager {
     public class SmallA implements Action {
         public void Do(ClientData player, int bet) {
             pots.get(0).pot_val = bet;
+            pots.get(0).players_curr_pot_invest.put(player.id,bet);
             player.curr_game_score -= bet;
         }
     }
@@ -355,37 +358,48 @@ public class TexasHoldemManger implements IGamesManager {
         public void Do(ClientData player, int bet) {
             pots.get(0).pot_val += bet;
             pots.get(0).curr_bet = bet;
+            pots.get(0).players_curr_pot_invest.put(player.id,bet);
             player.curr_game_score -= bet;
         }
     }
 
     public class CallA implements Action {
         public void Do(ClientData player, int bet) {
-            for(Pot pot : pots) {
-                //place partial bet in each pot
-                //update pot val
-                //update pot curr bet
+            CalculateCallGap(player,bet);
             }
-            player.curr_game_score -= bet;
         }
-    }
+
 
     public class BetA implements Action {
         public void Do(ClientData player, int bet) {
-            for(Pot pot : pots) {
-                //place partial bet in each pot
-                //update pot val
-                //update pot curr bet
-            }
-            player.curr_game_score -= bet;
+            int gap = CalculateCallGap(player,bet);
+            pots.get(pots.size()-1).players_curr_pot_invest.put(player.id,pots.get(pots.size()-1).players_curr_pot_invest.get(player.id) + gap);
+            pots.get(pots.size()-1).curr_bet += gap;
+            pots.get(pots.size()-1).pot_val += gap;
             in_hand_counter = 1;
         }
 
     }
 
+    public int CalculateCallGap(ClientData player, int bet) {
+        int total_gap = 0;
+        for (Pot pot : pots) {
+            //place partial bet in each pot
+            int curr_investment = pot.players_curr_pot_invest.get(player.id);
+            if (curr_investment < bet) {
+                int gap = bet - curr_investment;
+                pot.players_curr_pot_invest.put(player.id, pot.players_curr_pot_invest.get(player.id) + gap);
+                m_active_players.get(player.id).curr_game_score -= gap;
+                pot.pot_val += gap;
+                total_gap += gap;
+            }
+        }
+        return total_gap;
+    }
+
     public class CheckA implements Action {
         public void Do(ClientData player, int bet) {
-
+            // do nothing pass turn
         }
 
     }
