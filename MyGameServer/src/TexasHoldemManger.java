@@ -150,12 +150,13 @@ public class TexasHoldemManger implements IGamesManager {
         MsgHeader ret = new MsgHeader();
         if (massage_or_action == 1) {
             //asking next turn to take an action
-            ret.game_status = 100; // 100 - take an action, client read instruction
+            ret.game_status = 300; // 300 - take an action, client read instruction
             int curr_bet = 0;
             for (Pot pot : pots) {
-                curr_bet += pot.GetCurrBet();
+                curr_bet += pot.GetCurrGap(next_turn.get(player_turn_index).id);
             }
             ret.game_manger_msg = "Curr bet is:  " + curr_bet;
+            ret.quantity_param = curr_bet;
             massage_or_action = 2;
             ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
@@ -326,6 +327,11 @@ public class TexasHoldemManger implements IGamesManager {
 
         public int GetCurrBet() {
             return curr_bet;
+        }
+
+        public int GetCurrGap(int id) {
+
+            return curr_bet - players_curr_pot_invest.get(id);
         }
 
         public int GetPotVal() {

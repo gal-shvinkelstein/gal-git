@@ -244,6 +244,10 @@ public class Gamer
                 case XCircle:
                     game_manger = new XCircleManager();
                     break;
+                case TexasHoldem:
+                    // Todo: buy in payment method
+                    game_manger = new TexasHoldemManager(2500, m_id);
+                    break;
 
                 // add all games ....
             }
@@ -264,6 +268,10 @@ public class Gamer
             {
                 case XCircle:
                     game_manger = new XCircleManager();
+                    break;
+                case TexasHoldem:
+                    // Todo: buy in payment method
+                    game_manger = new TexasHoldemManager(2500, m_id);
                     break;
 
                 // add all games ....
