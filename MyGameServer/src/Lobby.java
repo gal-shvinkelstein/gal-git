@@ -44,6 +44,11 @@ public class Lobby
                 case Chess:
                     m_active_game = new ChessManager(log_c);
                     break;
+                case TexasHoldem:
+                    System.out.println("Creating TexasHoldem manager");
+                    m_active_game = new TexasHoldemManger(log_c);
+                    System.out.println("OK");
+                    break;
                    // add all games ....
 
             }
