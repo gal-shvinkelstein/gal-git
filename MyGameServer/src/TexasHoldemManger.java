@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 public class TexasHoldemManger implements IGamesManager {
     public TexasHoldemManger(ClientData opener) {
         pots = new ArrayList<>();
-        joined_num = 0;
+        joined_num = 1;
         player_turn_index = 0;
         game_step = 0;
         in_hand_counter = 0;
@@ -21,8 +21,8 @@ public class TexasHoldemManger implements IGamesManager {
         doActionFactory = new DoAction();
         all_in_counter = 0;
 
-        next_turn.set(joined_num++, opener);
-
+        //next_turn.set(joined_num++, opener);
+        next_turn.add(opener);
 
         game_deck = new Deck();
         game_deck.shuffle();
@@ -35,8 +35,9 @@ public class TexasHoldemManger implements IGamesManager {
         joiner.curr_game_score = 2500;
         joiner.curr_status = 1;
         m_active_players.put(joiner.id, joiner);
-        next_turn.set(joined_num++, joiner);
-
+//        next_turn.set(joined_num++, joiner);
+        next_turn.add(joiner);
+        joined_num++;
         return true;
     }
 
@@ -54,7 +55,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.req_type = ReqType.LeaveGame;
             Next(ret);
         }
-
+        --joined_num;
         m_active_players.remove(leaver.id);
     }
 

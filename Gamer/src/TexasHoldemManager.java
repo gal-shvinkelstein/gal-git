@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class TexasHoldemManager implements IGamesClients {
     public TexasHoldemManager(int buy_in, int id) {
-        System.out.println("Table create wait for other participants");
+        System.out.println("in Table");
         m_scanner = new Scanner(System.in);
         doActionFactory = new DoAction();
         chips = buy_in;
