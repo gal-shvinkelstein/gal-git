@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -8,6 +9,7 @@ public class TexasHoldemManager implements IGamesClients {
         doActionFactory = new DoAction();
         chips = buy_in;
         m_id = id;
+        in_round_status = 1;
     }
 
     @Override
@@ -25,77 +27,67 @@ public class TexasHoldemManager implements IGamesClients {
         else  if (msg.game_status == 20)
         {
             DisplayResults(msg);
+            in_round_status = 1;
         }
-        else if(msg.game_status == 300)
-        {
-            System.out.println("please choose your action, " + msg.game_manger_msg);
+        else if(msg.game_status == 300) {
+            System.out.println("please choose your action, ");
+            System.out.println(msg.game_manger_msg);
             System.out.println("1 - call \n 2 - raise \n 3 - allin \n 4 - check \n 5 - fold \n 6 - cash out");
             int choice = m_scanner.nextInt();
-            switch (choice)
-            {
-                case 1:
-                    if(chips <= msg.quantity_param)
-                    {
-                        Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                        my_turn = action.Do(chips);
-                    }
-                    else
-                    {
-                        Action action = doActionFactory.GetAction(Action.Type.Call);
-                        my_turn = action.Do(msg.quantity_param);
-
-                        chips -= msg.quantity_param;
-                    }
-                    break;
-                case 2:
-                    if(chips <= msg.quantity_param)
-                    {
-                        System.out.println("you don't have enough chips to raise you are allin");
-                        Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                        my_turn = action.Do(chips);
-                    }
-                    else
-                    {
-                        System.out.println("insert your raise");
-                        int raise = m_scanner.nextInt();
-                        if(raise >= chips)
-                        {
-                            System.out.println("you are allin");
+            if (in_round_status == 1) {
+                switch (choice) {
+                    case 1:
+                        if (chips <= msg.quantity_param) {
                             Action action = doActionFactory.GetAction(Action.Type.AllIn);
                             my_turn = action.Do(chips);
-                        }
-                        else {
-                            Action action = doActionFactory.GetAction(Action.Type.Bet);
-                            my_turn = action.Do(raise);
+                        } else {
+                            Action action = doActionFactory.GetAction(Action.Type.Call);
+                            my_turn = action.Do(msg.quantity_param);
 
+                            chips -= msg.quantity_param;
                         }
-                    }
-                    break;
-                case 3:
-                    {
+                        break;
+                    case 2:
+                        if (chips <= msg.quantity_param) {
+                            System.out.println("you don't have enough chips to raise you are allin");
+                            Action action = doActionFactory.GetAction(Action.Type.AllIn);
+                            my_turn = action.Do(chips);
+                        } else {
+                            System.out.println("insert your raise");
+                            int raise = m_scanner.nextInt();
+                            if (raise >= chips) {
+                                System.out.println("you are allin");
+                                Action action = doActionFactory.GetAction(Action.Type.AllIn);
+                                my_turn = action.Do(chips);
+                            } else {
+                                Action action = doActionFactory.GetAction(Action.Type.Bet);
+                                my_turn = action.Do(raise);
+
+                            }
+                        }
+                        break;
+                    case 3: {
                         Action action = doActionFactory.GetAction(Action.Type.AllIn);
                         my_turn = action.Do(chips);
                     }
                     break;
-                case 4:
-                    {
+                    case 4: {
                         Action action = doActionFactory.GetAction(Action.Type.Check);
                         my_turn = action.Do(0);
                     }
                     break;
-                case 5:
-                    {
+                    case 5: {
                         Action action = doActionFactory.GetAction(Action.Type.Fold);
                         my_turn = action.Do(0);
                     }
                     break;
-                case 6:
-                    {
+                    case 6: {
                         Action action = doActionFactory.GetAction(Action.Type.Continue);
                         my_turn = action.Do(0);
                         //todo: cash out method
                     }
                     break;
+                }
             }
         }
 
@@ -132,7 +124,7 @@ public class TexasHoldemManager implements IGamesClients {
         return "Joined successfully";
     }
 
-    public interface Action {
+    public interface Action extends Serializable {
         enum Type {
             SmallBlinds,
             BigBlinds,
@@ -202,6 +194,7 @@ public class TexasHoldemManager implements IGamesClients {
             my_turn.buffer = Action.Type.AllIn;
             my_turn.req_type = ReqType.PlayNext;
             chips = 0;
+            in_round_status = 0;
             return my_turn;
         }
 
@@ -212,6 +205,7 @@ public class TexasHoldemManager implements IGamesClients {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
             my_turn.buffer = Type.Fold;
+            in_round_status = 0;
             return my_turn;
         }
 
@@ -222,6 +216,7 @@ public class TexasHoldemManager implements IGamesClients {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
             my_turn.buffer = Type.Continue;
+            in_round_status = 0;
             return my_turn;
         }
 
@@ -232,6 +227,7 @@ public class TexasHoldemManager implements IGamesClients {
     private int chips;
     DoAction doActionFactory;
     private int m_id;
+    public int in_round_status;
 
     public enum HandValueType {
         ROYAL_FLUSH("a Royal Flush", 9),

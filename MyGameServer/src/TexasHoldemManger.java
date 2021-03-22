@@ -1,4 +1,5 @@
 //package Poker;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -139,7 +140,7 @@ public class TexasHoldemManger implements IGamesManager {
             game_step = (game_step + 1) % NumOfGameSteps;
             System.out.println("to next step: " + game_step);
             in_hand_counter = 0;
-            player_turn_index = next_turn.indexOf(pots.get(0).contributors.stream().findAny());
+            player_turn_index = SmallBlindIndex;
             for (Pot pot : pots)
             {
                     pot.players_curr_pot_invest.forEach((k,v) ->
@@ -393,7 +394,7 @@ public class TexasHoldemManger implements IGamesManager {
 
     }
 
-    public interface Action {
+    public interface Action extends Serializable {
         enum Type {
             SmallBlinds,
             BigBlinds,
