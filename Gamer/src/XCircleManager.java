@@ -74,6 +74,11 @@ public class XCircleManager implements IGamesClients{
     }
 
     @Override
+    public void DisplayStatus(MsgHeader ret) {
+        //do nothing
+    }
+
+    @Override
     public String JoinMassage() {
         return "Joined successfully";
     }

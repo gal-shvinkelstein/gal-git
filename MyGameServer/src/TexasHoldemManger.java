@@ -137,6 +137,7 @@ public class TexasHoldemManger implements IGamesManager {
         }
         if (in_hand_counter == curr_in_hand) {
             game_step = (game_step + 1) % NumOfGameSteps;
+            System.out.println("to next step: " + game_step);
             in_hand_counter = 0;
             player_turn_index = next_turn.indexOf(pots.get(0).contributors.stream().findAny());
             for (Pot pot : pots)
@@ -200,7 +201,7 @@ public class TexasHoldemManger implements IGamesManager {
         game_step = 0;
         ++SmallBlindIndex;
         in_hand_counter = 0;
-        ret.game_status = 2;
+        ret.game_status = 20;
         int total_pot = 0;
         for (Pot pot : pots) {
             total_pot += pot.GetPotVal();

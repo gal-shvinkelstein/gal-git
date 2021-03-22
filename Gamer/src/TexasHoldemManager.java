@@ -13,7 +13,7 @@ public class TexasHoldemManager implements IGamesClients {
     @Override
     public MsgHeader PlayTurn(MsgHeader msg) {
         MsgHeader my_turn = new MsgHeader();
-
+        my_turn.req_type = ReqType.PlayNext;
         if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
@@ -22,11 +22,11 @@ public class TexasHoldemManager implements IGamesClients {
         {
             DisplayStatus(msg);
         }
-        else  if (msg.game_status == 2)
+        else  if (msg.game_status == 20)
         {
             DisplayResults(msg);
         }
-        else
+        else if(msg.game_status == 300)
         {
             System.out.println("please choose your action, " + msg.game_manger_msg);
             System.out.println("1 - call \n 2 - raise \n 3 - allin \n 4 - check \n 5 - fold \n 6 - cash out");
@@ -102,6 +102,7 @@ public class TexasHoldemManager implements IGamesClients {
         return my_turn;
     }
 
+    @Override
     public void DisplayStatus(MsgHeader msg)
     {
         System.out.println(msg.game_manger_msg);
