@@ -319,11 +319,11 @@ public class Gamer
         System.out.println("2");
         MsgHeader ret;
         ret = (MsgHeader) m_is.readObject();
-        if(ret.game_status == 2)
+        if(ret.game_status == 2 || ret.game_status == 200)
         {
             game_manger.DisplayResults(ret);
         }
-        if (ret.game_status == 1) {
+        if (ret.game_status == 1 || ret.game_status == 0 || ret.game_status == 100 || ret.game_status == 300) {
             System.out.println("3");
             MsgHeader next = game_manger.PlayTurn(ret);
             System.out.println("4");

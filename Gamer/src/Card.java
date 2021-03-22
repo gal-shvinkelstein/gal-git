@@ -1,4 +1,6 @@
-public class Card implements Comparable<Card> {
+import java.io.Serializable;
+
+public class Card implements Comparable<Card>, Serializable {
 
     public static final int NO_OF_RANKS = 13;
     public static final int NO_OF_SUITS = 4;

@@ -5,6 +5,13 @@ import java.util.stream.Collectors;
 public class TexasHoldemManger implements IGamesManager {
     public TexasHoldemManger(ClientData opener) {
         pots = new ArrayList<>();
+        m_active_players = new HashMap<>();
+        next_turn = new Vector<>();
+        board = new ArrayList<>();
+        doActionFactory = new DoAction();
+        game_deck = new Deck();
+        players_hand = new HashMap<>();
+
         joined_num = 1;
         player_turn_index = 0;
         game_step = 0;
@@ -12,22 +19,14 @@ public class TexasHoldemManger implements IGamesManager {
         curr_in_hand = 1;
         massage_or_action = 0;
         SmallBlindIndex = 0;
-        m_active_players = new HashMap<>();
-        next_turn = new Vector<>();
+        all_in_counter = 0;
+
         opener.curr_game_score = 2500; // default buy in
         opener.curr_status = 1; // wait for next hand
         m_active_players.put(opener.id, opener);
-        board = new ArrayList<>();
-        doActionFactory = new DoAction();
-        all_in_counter = 0;
-
-        //next_turn.set(joined_num++, opener);
         next_turn.add(opener);
 
-        game_deck = new Deck();
         game_deck.shuffle();
-
-
     }
 
     @Override
@@ -63,18 +62,25 @@ public class TexasHoldemManger implements IGamesManager {
     public MsgHeader Next(MsgHeader last_move) {
         MsgHeader ret = new MsgHeader();
         ret.req_type = ReqType.PlayNext;
+        System.out.println("next");
         ret.usr_Id = next_turn.get(player_turn_index).id;
+        System.out.println("next id : "+ ret.usr_Id);
 
         if (game_step == 0) // dealing cards
         {
             StartNewRound();
+            System.out.println("start new round");
             List<Card> next = DealNextHand();
+            System.out.println("deal hand");
+
             ret.buffer = next;
             ret.game_status = 0;
             ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
             Hand newHand = new Hand(next);
+            System.out.println("crating hand");
             players_hand.put(ret.usr_Id,newHand);
+            System.out.println("updating hand");
         }
         if (game_step == 1) // placing first bet
         {
@@ -257,6 +263,7 @@ public class TexasHoldemManger implements IGamesManager {
         pots.forEach((n) -> n.Clear());
         Pot pot = new Pot(SmallBlind * 2);
         int counter = next_turn.size();
+        curr_in_hand = counter;
         int i;
         for (i = SmallBlindIndex; i < next_turn.size(); ++i) {
             --counter;
@@ -270,6 +277,7 @@ public class TexasHoldemManger implements IGamesManager {
             ++i;
             --counter;
         }
+
         pots.add(pot);
         game_deck.reset();
         game_deck.shuffle();
