@@ -115,11 +115,15 @@ public class Lobby
 
     public void Next(MsgHeader last_turn) throws IOException {
         System.out.println("last turn id: " + last_turn.usr_Id);
-        int id = last_turn.usr_Id;
+
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
         //check results
         if(ret.game_status != 2 && ret.game_status != 200) {
+            if(m_active_players.size() < 2)
+            {
+                ret.game_status = 2000;
+            }
             System.out.println(" next turn id: " + ret.usr_Id);
             m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
         }

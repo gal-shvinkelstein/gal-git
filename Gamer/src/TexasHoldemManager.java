@@ -124,7 +124,7 @@ public class TexasHoldemManager implements IGamesClients {
         return "Joined successfully";
     }
 
-    public interface Action extends Serializable {
+    public interface Action{
         enum Type {
             SmallBlinds,
             BigBlinds,
@@ -159,7 +159,7 @@ public class TexasHoldemManager implements IGamesClients {
         public MsgHeader Do(int bet) {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Action.Type.Call;
+            my_turn.buffer = "Call";
             return my_turn;
         }
     }
@@ -169,7 +169,7 @@ public class TexasHoldemManager implements IGamesClients {
         public MsgHeader Do(int bet) {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Type.Bet;
+            my_turn.buffer = "Bet";
             chips -= bet;
             return my_turn;
         }
@@ -181,7 +181,7 @@ public class TexasHoldemManager implements IGamesClients {
             // do nothing pass turn
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Type.Check;
+            my_turn.buffer = "Check";
             return my_turn;
         }
 
@@ -191,7 +191,7 @@ public class TexasHoldemManager implements IGamesClients {
         public MsgHeader Do(int bet) {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Action.Type.AllIn;
+            my_turn.buffer = "AllIn";
             my_turn.req_type = ReqType.PlayNext;
             chips = 0;
             in_round_status = 0;
@@ -204,7 +204,7 @@ public class TexasHoldemManager implements IGamesClients {
         public MsgHeader Do(int bet) {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Type.Fold;
+            my_turn.buffer = "Fold";
             in_round_status = 0;
             return my_turn;
         }
@@ -215,7 +215,7 @@ public class TexasHoldemManager implements IGamesClients {
         public MsgHeader Do(int bet) {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
-            my_turn.buffer = Type.Continue;
+            my_turn.buffer = "Continue";
             in_round_status = 0;
             return my_turn;
         }

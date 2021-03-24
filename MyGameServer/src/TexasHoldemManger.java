@@ -86,21 +86,22 @@ public class TexasHoldemManger implements IGamesManager {
         if (game_step == 1) // placing first bet
         {
             if (massage_or_action == 0) {
+                System.out.println("blinds step");
                 ret.game_status = 100;
                 //small blind
                 if (next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex).id) {
-                    ret.buffer = Action.Type.SmallBlinds;
+                    System.out.println("Small");
                     ret.quantity_param = SmallBlind;
                     Action small = doActionFactory.GetAction(Action.Type.SmallBlinds);
                     small.Do(m_active_players.get(last_move.usr_Id), SmallBlind);
                 } else {
                     //big blind
-                    ret.buffer = Action.Type.BigBlinds;
+                    System.out.println("Big");
                     ret.quantity_param = SmallBlind * 2;
                     Action big = doActionFactory.GetAction(Action.Type.BigBlinds);
                     big.Do(m_active_players.get(last_move.usr_Id), SmallBlind * 2);
 
-                    massage_or_action = 2;
+                    massage_or_action = 1;
                 }
                 player_turn_index = (player_turn_index + 1) % next_turn.size();
             } else {
@@ -158,7 +159,7 @@ public class TexasHoldemManger implements IGamesManager {
     private MsgHeader BettingRound(MsgHeader last_move) {
         MsgHeader ret = new MsgHeader();
         if (massage_or_action == 1) {
-            //asking next turn to take an action
+            System.out.println("asking next turn to take an action");//asking next turn to take an action
             ret.game_status = 300; // 300 - take an action, client read instruction
             int curr_bet = 0;
             for (Pot pot : pots) {
@@ -166,13 +167,16 @@ public class TexasHoldemManger implements IGamesManager {
             }
             ret.game_manger_msg = "Curr bet is:  " + curr_bet;
             ret.quantity_param = curr_bet;
+            ret.usr_Id = next_turn.get(player_turn_index).id;
             massage_or_action = 2;
             ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
         } else {
             //check last move action + update pot data
-            Action.Type type = (Action.Type) last_move.buffer;
-            Action action = doActionFactory.GetAction(type);
+            System.out.println("preparing for broadcast update");
+            String type = (String) last_move.buffer;
+            Action.Type last_action = Action.Type.valueOf(type);
+            Action action = doActionFactory.GetAction(last_action);
             action.Do(m_active_players.get(last_move.usr_Id), last_move.quantity_param);
             //update all players
             ret.game_status = 200; // client read massage
@@ -394,7 +398,7 @@ public class TexasHoldemManger implements IGamesManager {
 
     }
 
-    public interface Action extends Serializable {
+    public interface Action{
         enum Type {
             SmallBlinds,
             BigBlinds,

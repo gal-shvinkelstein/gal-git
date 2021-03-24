@@ -314,24 +314,27 @@ public class Gamer
     public void WaitForManager() throws IOException, ClassNotFoundException {
         System.out.println("I'm waiting");
         MsgHeader msg = InitMsg(ReqType.Wait,m_id,m_pass,curr_lobby);
-        System.out.println("1");
-        m_os.writeObject(msg);
-        System.out.println("2");
-        MsgHeader ret;
-        ret = (MsgHeader) m_is.readObject();
-        if(ret.game_status == 2)
-        {
-            game_manger.DisplayResults(ret);
-        }
-        else
-        {
-            System.out.println("3");
-            MsgHeader next = game_manger.PlayTurn(ret);
-            System.out.println("4");
-            next.usr_Id = m_id;
-            m_os.writeObject(next);
-            System.out.println("5");
-            WaitForManager();
+        boolean status = true;
+        while(status) {
+            m_os.writeObject(msg);
+            System.out.println("1");
+            MsgHeader ret;
+            ret = (MsgHeader) m_is.readObject();
+            if (ret.game_status == 2) {
+                game_manger.DisplayResults(ret);
+                status = false;
+            }else if(ret.game_status == 2000)
+            {
+                System.out.println("all participants has left building");
+                status = false;
+                // cash out...
+            }
+            else {
+                MsgHeader next = game_manger.PlayTurn(ret);
+                System.out.println("2");
+                next.usr_Id = m_id;
+                m_os.writeObject(next);
+            }
         }
 
 
