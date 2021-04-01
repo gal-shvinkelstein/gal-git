@@ -102,6 +102,11 @@ public class XCircleManger implements IGamesManager{
         return m_active_players;
     }
 
+    @Override
+    public int GetGameStep() {
+        return 0;
+    }
+
     private final int max_players = 2;
     private int player_turn;
     private int[] board;

@@ -55,6 +55,12 @@ public class ChessManager implements IGamesManager{
     {
         return m_active_players;
     }
+
+    @Override
+    public int GetGameStep() {
+        return 0;
+    }
+
     private final int max_players = 2;
     private HashMap<Integer, ClientData > m_active_players;
 }

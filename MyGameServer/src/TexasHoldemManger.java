@@ -304,6 +304,11 @@ public class TexasHoldemManger implements IGamesManager {
         return m_active_players;
     }
 
+    @Override
+    public int GetGameStep() {
+        return game_step;
+    }
+
     private final int NumOfGameSteps = 7;
     private final int SmallBlind = 5;
     private int SmallBlindIndex;

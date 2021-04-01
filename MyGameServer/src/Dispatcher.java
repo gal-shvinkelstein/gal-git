@@ -154,9 +154,12 @@ public class Dispatcher
         {
             m_commands.get(msg.req_type).run();
         }
-        else
+        else// if(m_client_data.GetLobList().get(msg.lobby_id).GetGameStep() > 1)
         {
             System.out.println("client " +msg.usr_Id +  " wait for his turn");
+//            m_curr_msg.req_type = ReqType.PlayNext;
+//            m_curr_msg.game_status = 200;
+//            m_commands.get(m_curr_msg.req_type).run();
         }
     }
 

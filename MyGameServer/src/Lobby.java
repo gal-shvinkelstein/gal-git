@@ -140,12 +140,18 @@ public class Lobby
             });
             if (ret.game_status == 200)
             {
-                Next(last_turn);
+                System.out.println("after broadcast");
+                ret = m_active_game.Next(last_turn);
+                m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
             }
 
         }
     }
+    public int GetGameStep()
+    {
+        return  m_active_game.GetGameStep();
+    }
 
-    private HashMap<Integer, ClientData > m_active_players;
+    HashMap<Integer, ClientData > m_active_players;
     private IGamesManager m_active_game;
 }

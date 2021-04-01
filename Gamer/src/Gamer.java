@@ -333,6 +333,7 @@ public class Gamer
                 MsgHeader next = game_manger.PlayTurn(ret);
                 System.out.println("2");
                 next.usr_Id = m_id;
+                next.lobby_id = curr_lobby;
                 m_os.writeObject(next);
             }
         }

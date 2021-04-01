@@ -8,4 +8,5 @@ public interface IGamesManager {
     int GetMaxPlayers();
     int GetCurrActiveNumOfPlayers();
     HashMap<Integer, ClientData > GetForBroadcast();
+    int GetGameStep();
 }

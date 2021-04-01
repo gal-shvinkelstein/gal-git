@@ -15,7 +15,7 @@ public class TexasHoldemManager implements IGamesClients {
     @Override
     public MsgHeader PlayTurn(MsgHeader msg) {
         MsgHeader my_turn = new MsgHeader();
-        my_turn.req_type = ReqType.PlayNext;
+
         if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
@@ -90,7 +90,7 @@ public class TexasHoldemManager implements IGamesClients {
                 }
             }
         }
-
+        my_turn.req_type = ReqType.PlayNext;
         return my_turn;
     }
 
