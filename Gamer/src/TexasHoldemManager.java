@@ -15,8 +15,11 @@ public class TexasHoldemManager implements IGamesClients {
     @Override
     public MsgHeader PlayTurn(MsgHeader msg) {
         MsgHeader my_turn = new MsgHeader();
-
-        if(msg.game_status == 100)
+        if(msg.game_status == 0)
+        {
+            System.out.println("your cards is: " + msg.buffer.toString());
+        }
+        else if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
         }
