@@ -18,19 +18,24 @@ public class TexasHoldemManager implements IGamesClients {
         if(msg.game_status == 0)
         {
             System.out.println("your cards is: " + msg.buffer.toString());
+            System.out.println("your chip count: " + chips);
+
         }
         else if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
+            System.out.println("your chip count: " + chips);
         }
         else if(msg.game_status == 200)
         {
             DisplayStatus(msg);
+            System.out.println("your chip count: " + chips);
         }
         else  if (msg.game_status == 20)
         {
             DisplayResults(msg);
             in_round_status = 1;
+            System.out.println("your chip count: " + chips);
         }
         else if(msg.game_status == 300) {
             System.out.println("please choose your action, ");
@@ -163,6 +168,9 @@ public class TexasHoldemManager implements IGamesClients {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
             my_turn.buffer = "Call";
+            chips -= bet;
+            System.out.println("your update chips count is: " + chips);
+
             return my_turn;
         }
     }
@@ -174,6 +182,8 @@ public class TexasHoldemManager implements IGamesClients {
             my_turn.quantity_param = bet;
             my_turn.buffer = "Bet";
             chips -= bet;
+            System.out.println("your update chips count is: " + chips);
+
             return my_turn;
         }
 
