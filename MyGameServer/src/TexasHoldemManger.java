@@ -165,7 +165,7 @@ public class TexasHoldemManger implements IGamesManager {
             for (Pot pot : pots) {
                 curr_bet += pot.GetCurrGap(next_turn.get(player_turn_index).id);
             }
-            ret.game_manger_msg = "Curr bet is:  " + curr_bet;
+            ret.game_manger_msg = "to call:  " + curr_bet;
             ret.quantity_param = curr_bet;
             ret.usr_Id = next_turn.get(player_turn_index).id;
             massage_or_action = 2;
@@ -367,7 +367,7 @@ public class TexasHoldemManger implements IGamesManager {
                 players_curr_pot_invest.put(contributor.id,players_curr_pot_invest.get(contributor.id) - gap);
             }
             curr_bet = partialBet;
-            pot_val = curr_bet * contributors.size();
+            //pot_val = curr_bet * contributors.size();
             pot.contributors.remove(player);
             pot.players_curr_pot_invest.remove(player.id);
             pot.pot_val = pot.curr_bet * pot.contributors.size();
@@ -437,7 +437,7 @@ public class TexasHoldemManger implements IGamesManager {
     public class SmallA implements Action {
         public void Do(ClientData player, int bet) {
             pots.get(0).pot_val = bet;
-            pots.get(0).players_curr_pot_invest.put(player.id,bet);
+            pots.get(0).players_curr_pot_invest.put(player.id,bet);// change to set new value
             player.curr_game_score -= bet;
         }
     }
@@ -445,8 +445,8 @@ public class TexasHoldemManger implements IGamesManager {
     public class BigA implements Action {
         public void Do(ClientData player, int bet) {
             pots.get(0).pot_val += bet;
-            pots.get(0).curr_bet = bet;
-            pots.get(0).players_curr_pot_invest.put(player.id,bet);
+//            pots.get(0).curr_bet = bet;
+            pots.get(0).players_curr_pot_invest.put(player.id,bet);// change to set new value
             player.curr_game_score -= bet;
         }
     }
@@ -461,7 +461,7 @@ public class TexasHoldemManger implements IGamesManager {
     public class BetA implements Action {
         public void Do(ClientData player, int bet) {
             int gap = CalculateCallGap(player,bet);
-            pots.get(pots.size()-1).players_curr_pot_invest.put(player.id,pots.get(pots.size()-1).players_curr_pot_invest.get(player.id) + gap);
+            pots.get(pots.size()-1).players_curr_pot_invest.put(player.id,pots.get(pots.size()-1).players_curr_pot_invest.get(player.id) + gap);//to fix!
             pots.get(pots.size()-1).curr_bet += gap;
             pots.get(pots.size()-1).pot_val += gap;
             in_hand_counter = 1;
@@ -476,7 +476,7 @@ public class TexasHoldemManger implements IGamesManager {
             int curr_investment = pot.players_curr_pot_invest.get(player.id);
             if (curr_investment < bet) {
                 int gap = bet - curr_investment;
-                pot.players_curr_pot_invest.put(player.id, pot.players_curr_pot_invest.get(player.id) + gap);
+                pot.players_curr_pot_invest.put(player.id, pot.players_curr_pot_invest.get(player.id) + gap);//to fix!
                 m_active_players.get(player.id).curr_game_score -= gap;
                 pot.pot_val += gap;
                 total_gap += gap;
@@ -498,7 +498,7 @@ public class TexasHoldemManger implements IGamesManager {
                 if(chips >= pot.curr_bet)
                 {
                     int gap = chips - pot.curr_bet;
-                    pot.players_curr_pot_invest.put(player.id,pot.players_curr_pot_invest.get(player.id) + gap);
+                    pot.players_curr_pot_invest.put(player.id,pot.players_curr_pot_invest.get(player.id) + gap);//to fix!
                     chips -= gap;
                     pot.pot_val += gap;
                 }

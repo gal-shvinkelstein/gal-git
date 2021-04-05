@@ -52,7 +52,7 @@ public class TexasHoldemManager implements IGamesClients {
                             Action action = doActionFactory.GetAction(Action.Type.Call);
                             my_turn = action.Do(msg.quantity_param);
 
-                            chips -= msg.quantity_param;
+                            //chips -= msg.quantity_param;
                         }
                         break;
                     case 2:
