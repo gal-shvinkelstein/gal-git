@@ -115,21 +115,24 @@ public class TexasHoldemManger implements IGamesManager {
             board.add(game_deck.deal());
             board.add(game_deck.deal());
             board.add(game_deck.deal());
-//            ret.game_manger_msg = board.get(0).toString() + " " + board.get(1).toString() + " "  + board.get(2).toString();
             ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
             ret.game_status = 200;
             game_step++;
         } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
         {
+            System.out.println("game step: " + game_step);
             if ((curr_in_hand - all_in_counter) > 1) {
+                System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
                 ret = BettingRound(last_move);
             }
             else if(game_step == 7)
             {
+                System.out.println("calculate results");
                 ret = RoundResult();
             }
             else
             {
+                System.out.println("open cards!");
                 ++game_step;
             }
         }
@@ -140,7 +143,7 @@ public class TexasHoldemManger implements IGamesManager {
         if (in_hand_counter == curr_in_hand) {
             game_step = (game_step + 1) % NumOfGameSteps;
             System.out.println("to next step: " + game_step);
-            in_hand_counter = 0;
+            in_hand_counter = -1;
             player_turn_index = SmallBlindIndex;
             for (Pot pot : pots)
             {
@@ -152,8 +155,43 @@ public class TexasHoldemManger implements IGamesManager {
                 ++SmallBlindIndex;
             }
         }
+        if(massage_or_action == 2) {
+            ++in_hand_counter;
+        }
 
         return ret;
+    }
+
+    private void StartNewRound() {
+        player_turn_index = SmallBlindIndex;
+        pots.clear();
+        Pot pot = new Pot(SmallBlind * 2);
+        int counter = next_turn.size();
+        curr_in_hand = counter;
+        int i;
+        for (i = SmallBlindIndex; i < next_turn.size(); ++i) {
+            --counter;
+            pot.contributors.add(next_turn.get(i));
+            System.out.println("new round, adding: " + next_turn.get(i).id);
+            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
+            System.out.println("added");
+        }
+        i = 0;
+        while (counter != 0) {
+            pot.contributors.add(next_turn.get(i));
+            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
+            ++i;
+            --counter;
+        }
+
+        pots.add(pot);
+        game_deck.reset();
+        game_deck.shuffle();
+    }
+
+    private List<Card> DealNextHand() {
+        List<Card> new_hand = game_deck.deal(2);
+        return new_hand;
     }
 
     private MsgHeader BettingRound(MsgHeader last_move) {
@@ -173,7 +211,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.quantity_param = curr_bet;
             ret.usr_Id = next_turn.get(player_turn_index).id;
             massage_or_action = 2;
-            ++in_hand_counter;
+//            ++in_hand_counter;
             player_turn_index = (player_turn_index + 1) % next_turn.size();
         } else {
             //check last move action + update pot data
@@ -261,38 +299,6 @@ public class TexasHoldemManger implements IGamesManager {
 
 
         return ret;
-    }
-
-    private List<Card> DealNextHand() {
-        List<Card> new_hand = game_deck.deal(2);
-        return new_hand;
-    }
-
-    private void StartNewRound() {
-        player_turn_index = SmallBlindIndex;
-        pots.clear();
-        Pot pot = new Pot(SmallBlind * 2);
-        int counter = next_turn.size();
-        curr_in_hand = counter;
-        int i;
-        for (i = SmallBlindIndex; i < next_turn.size(); ++i) {
-            --counter;
-            pot.contributors.add(next_turn.get(i));
-            System.out.println("new round, adding: " + next_turn.get(i));
-            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
-            System.out.println("added");
-        }
-        i = 0;
-        while (counter != 0) {
-            pot.contributors.add(next_turn.get(i));
-            pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
-            ++i;
-            --counter;
-        }
-
-        pots.add(pot);
-        game_deck.reset();
-        game_deck.shuffle();
     }
 
     @Override
