@@ -99,6 +99,7 @@ public class TexasHoldemManager implements IGamesClients {
             }
         }
         my_turn.req_type = ReqType.PlayNext;
+        my_turn.usr_Id = m_id;
         return my_turn;
     }
 

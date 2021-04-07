@@ -93,13 +93,13 @@ public class TexasHoldemManger implements IGamesManager {
                     System.out.println("Small");
                     ret.quantity_param = SmallBlind;
                     Action small = doActionFactory.GetAction(Action.Type.SmallBlinds);
-                    small.Do(m_active_players.get(last_move.usr_Id), SmallBlind);
+                    small.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind);
                 } else {
                     //big blind
                     System.out.println("Big");
                     ret.quantity_param = SmallBlind * 2;
                     Action big = doActionFactory.GetAction(Action.Type.BigBlinds);
-                    big.Do(m_active_players.get(last_move.usr_Id), SmallBlind * 2);
+                    big.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind * 2);
 
                     massage_or_action = 1;
                 }
@@ -116,12 +116,12 @@ public class TexasHoldemManger implements IGamesManager {
             board.add(game_deck.deal());
             board.add(game_deck.deal());
 //            ret.game_manger_msg = board.get(0).toString() + " " + board.get(1).toString() + " "  + board.get(2).toString();
-            ret.game_manger_msg = board.stream().map(Objects::toString).collect(Collectors.joining(", "));
+            ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
             ret.game_status = 200;
             game_step++;
         } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
         {
-            if ((in_hand_counter - all_in_counter) > 1) {
+            if ((curr_in_hand - all_in_counter) > 1) {
                 ret = BettingRound(last_move);
             }
             else if(game_step == 7)
