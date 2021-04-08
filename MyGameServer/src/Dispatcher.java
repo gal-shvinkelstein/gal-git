@@ -159,7 +159,10 @@ public class Dispatcher
             System.out.println("client " +msg.usr_Id +  " wait for his turn");
 //            m_curr_msg.req_type = ReqType.PlayNext;
 //            m_curr_msg.game_status = 200;
-//            m_commands.get(m_curr_msg.req_type).run();
+            if (msg.game_status == 200) {
+                m_commands.get(msg.req_type).run();
+            }
+
         }
     }
 

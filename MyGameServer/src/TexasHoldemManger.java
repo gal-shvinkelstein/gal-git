@@ -143,7 +143,7 @@ public class TexasHoldemManger implements IGamesManager {
         if (in_hand_counter == curr_in_hand) {
             game_step = (game_step + 1) % NumOfGameSteps;
             System.out.println("to next step: " + game_step);
-            in_hand_counter = -1;
+            in_hand_counter = 0;
             player_turn_index = SmallBlindIndex;
             for (Pot pot : pots)
             {
@@ -154,8 +154,11 @@ public class TexasHoldemManger implements IGamesManager {
                 ret = RoundResult();
                 ++SmallBlindIndex;
             }
+            if(game_step > 1) {
+                massage_or_action = 1;
+            }
         }
-        if(massage_or_action == 2) {
+        else if(massage_or_action == 2) {
             ++in_hand_counter;
         }
 
@@ -441,7 +444,8 @@ public class TexasHoldemManger implements IGamesManager {
             AllIn,
             Check,
             Fold, //update contributors
-            Continue //update contributors next_turn in case of leaving
+            Continue, //update contributors next_turn in case of leaving
+            Wait
         }
 
         void Do(ClientData player, int bet);
@@ -459,6 +463,7 @@ public class TexasHoldemManger implements IGamesManager {
                 case Check -> new CheckA();
                 case Fold -> new FoldA();
                 case Continue -> new ContinueA();
+                case Wait -> new Wait();
             };
         }
     }
@@ -556,13 +561,20 @@ public class TexasHoldemManger implements IGamesManager {
     public class ContinueA implements Action {
         public void Do(ClientData player, int bet) {
             next_turn.remove(player);
-            for(Pot pot : pots) {
+            for (Pot pot : pots) {
                 pot.contributors.remove(player);
                 pot.players_curr_pot_invest.remove(player.id);
             }
         }
-
     }
+
+        public class Wait implements Action {
+            public void Do(ClientData player, int bet) {
+                MsgHeader next = new MsgHeader();
+                Next(next);
+            }
+    }
+
     public class Hand {
 
         private static final int MAX_NO_OF_CARDS = 7;

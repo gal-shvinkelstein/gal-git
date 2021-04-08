@@ -10,6 +10,7 @@ public class TexasHoldemManager implements IGamesClients {
         chips = buy_in;
         m_id = id;
         in_round_status = 1;
+        m_round_step = 0;
     }
 
     @Override
@@ -19,17 +20,22 @@ public class TexasHoldemManager implements IGamesClients {
         {
             System.out.println("your cards is: " + msg.buffer.toString());
             System.out.println("your chip count: " + chips);
-
+            ++m_round_step;
         }
         else if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
             System.out.println("your chip count: " + chips);
+            ++m_round_step;
         }
         else if(msg.game_status == 200)
         {
             DisplayStatus(msg);
             System.out.println("your chip count: " + chips);
+            my_turn.req_type = ReqType.Wait;
+//            if(m_round_step > 2) {
+//                my_turn.game_status = 200;
+//            }
         }
         else  if (msg.game_status == 20)
         {
@@ -96,9 +102,12 @@ public class TexasHoldemManager implements IGamesClients {
                     }
                     break;
                 }
+                ++m_round_step;
             }
         }
-        my_turn.req_type = ReqType.PlayNext;
+        if(msg.game_status != 200) {
+            my_turn.req_type = ReqType.PlayNext;
+        }
         my_turn.usr_Id = m_id;
         return my_turn;
     }
@@ -242,6 +251,7 @@ public class TexasHoldemManager implements IGamesClients {
     DoAction doActionFactory;
     private int m_id;
     public int in_round_status;
+    private int m_round_step;
 
     public enum HandValueType {
         ROYAL_FLUSH("a Royal Flush", 9),
