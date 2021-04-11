@@ -110,6 +110,7 @@ public class Dispatcher
                 e.printStackTrace();
             }
         });
+
     }
     public void Connected() throws IOException {
         System.out.println("Connection to client succeed");
@@ -154,14 +155,14 @@ public class Dispatcher
         {
             m_commands.get(msg.req_type).run();
         }
-        else// if(m_client_data.GetLobList().get(msg.lobby_id).GetGameStep() > 1)
+        else if(m_client_data.GetLobList().get(msg.lobby_id).GetGameStep() > 1)
         {
             System.out.println("client " +msg.usr_Id +  " wait for his turn");
-//            m_curr_msg.req_type = ReqType.PlayNext;
-//            m_curr_msg.game_status = 200;
-            if (msg.game_status == 200) {
-                m_commands.get(msg.req_type).run();
-            }
+            m_curr_msg.req_type = ReqType.PlayNext;
+            m_curr_msg.game_status = 200;
+
+            m_commands.get(m_curr_msg.req_type).run();
+
 
         }
     }

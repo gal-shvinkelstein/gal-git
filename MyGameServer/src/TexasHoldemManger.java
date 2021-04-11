@@ -67,101 +67,103 @@ public class TexasHoldemManger implements IGamesManager {
         ret.usr_Id = next_turn.get(player_turn_index).id;
         System.out.println("next id : "+ ret.usr_Id);
 
-        if (game_step == 0) // dealing cards
+        if(game_step < 2 || last_move.usr_Id == next_turn.get(player_turn_index).id || massage_or_action == 2)
         {
-            StartNewRound();
-            System.out.println("start new round");
-            List<Card> next = DealNextHand();
-            System.out.println("deal hand");
+            System.out.println("Go Ahead: " + next_turn.get(player_turn_index).id);
+            if (game_step == 0) // dealing cards
+            {
+                StartNewRound();
+                System.out.println("start new round");
+                List<Card> next = DealNextHand();
+                System.out.println("deal hand");
 
-            ret.buffer = next;
-            ret.game_status = 0;
-            ++in_hand_counter;
-            player_turn_index = (player_turn_index + 1) % next_turn.size();
-            Hand newHand = new Hand(next);
-            System.out.println("crating hand");
-            players_hand.put(ret.usr_Id,newHand);
-            System.out.println("updating hand");
-        }
-        if (game_step == 1) // placing first bet
-        {
-            if (massage_or_action == 0) {
-                System.out.println("blinds step");
-                ret.game_status = 100;
-                //small blind
-                if (next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex).id) {
-                    System.out.println("Small");
-                    ret.quantity_param = SmallBlind;
-                    Action small = doActionFactory.GetAction(Action.Type.SmallBlinds);
-                    small.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind);
+                ret.buffer = next;
+                ret.game_status = 0;
+                ++in_hand_counter;
+                player_turn_index = (player_turn_index + 1) % next_turn.size();
+                Hand newHand = new Hand(next);
+                System.out.println("crating hand");
+                players_hand.put(ret.usr_Id, newHand);
+                System.out.println("updating hand");
+            }
+            if (game_step == 1) // placing first bet
+            {
+                if (massage_or_action == 0) {
+                    System.out.println("blinds step");
+                    ret.game_status = 100;
+                    //small blind
+                    if (next_turn.get(player_turn_index).id == next_turn.get(SmallBlindIndex).id) {
+                        System.out.println("Small");
+                        ret.quantity_param = SmallBlind;
+                        Action small = doActionFactory.GetAction(Action.Type.SmallBlinds);
+                        small.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind);
+                    } else {
+                        //big blind
+                        System.out.println("Big");
+                        ret.quantity_param = SmallBlind * 2;
+                        Action big = doActionFactory.GetAction(Action.Type.BigBlinds);
+                        big.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind * 2);
+
+                        massage_or_action = 1;
+                    }
+                    player_turn_index = (player_turn_index + 1) % next_turn.size();
                 } else {
-                    //big blind
-                    System.out.println("Big");
-                    ret.quantity_param = SmallBlind * 2;
-                    Action big = doActionFactory.GetAction(Action.Type.BigBlinds);
-                    big.Do(m_active_players.get(next_turn.get(player_turn_index).id), SmallBlind * 2);
+                    ret = BettingRound(last_move);
+                }
 
+            } else if (game_step == 2) // flop
+            {
+                // creating string table;
+                System.out.println("Dealing flop");
+                game_deck.deal(); // burned card
+                board.add(game_deck.deal());
+                board.add(game_deck.deal());
+                board.add(game_deck.deal());
+                ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
+                ret.game_status = 200;
+                game_step++;
+            } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
+            {
+                System.out.println("game step: " + game_step);
+                if ((curr_in_hand - all_in_counter) > 1) {
+                    System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
+                    ret = BettingRound(last_move);
+                } else if (game_step == 7) {
+                    System.out.println("calculate results");
+                    ret = RoundResult();
+                } else {
+                    System.out.println("open cards!");
+                    ++game_step;
+                }
+            }
+            if (game_step == 4 || game_step == 6) // deal turn or river
+            {
+                ret = DealOneToBoard();
+            }
+            if (in_hand_counter == curr_in_hand) {
+                game_step = (game_step + 1) % NumOfGameSteps;
+                System.out.println("to next step: " + game_step);
+                in_hand_counter = 0;
+                player_turn_index = SmallBlindIndex;
+                for (Pot pot : pots) {
+                    pot.players_curr_pot_invest.forEach((k, v) ->
+                            pot.players_curr_pot_invest.put(k, pot.players_curr_pot_invest.get(k) - v));
+                }
+                if (game_step == 0) {
+                    ret = RoundResult();
+                    ++SmallBlindIndex;
+                }
+                if (game_step > 1) {
                     massage_or_action = 1;
                 }
-                player_turn_index = (player_turn_index + 1) % next_turn.size();
-            } else {
-                ret = BettingRound(last_move);
-            }
-
-        } else if (game_step == 2) // flop
-        {
-            // creating string table;
-            game_deck.deal(); // burned card
-            board.add(game_deck.deal());
-            board.add(game_deck.deal());
-            board.add(game_deck.deal());
-            ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
-            ret.game_status = 200;
-            game_step++;
-        } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
-        {
-            System.out.println("game step: " + game_step);
-            if ((curr_in_hand - all_in_counter) > 1) {
-                System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
-                ret = BettingRound(last_move);
-            }
-            else if(game_step == 7)
-            {
-                System.out.println("calculate results");
-                ret = RoundResult();
-            }
-            else
-            {
-                System.out.println("open cards!");
-                ++game_step;
+            } else if (massage_or_action == 2) {
+                ++in_hand_counter;
             }
         }
-        if (game_step == 4 || game_step == 6) // deal turn or river
-        {
-            ret = DealOneToBoard();
+        else {
+            ret.req_type = ReqType.Wait;
+            player_turn_index = (player_turn_index + 1) % next_turn.size();
         }
-        if (in_hand_counter == curr_in_hand) {
-            game_step = (game_step + 1) % NumOfGameSteps;
-            System.out.println("to next step: " + game_step);
-            in_hand_counter = 0;
-            player_turn_index = SmallBlindIndex;
-            for (Pot pot : pots)
-            {
-                    pot.players_curr_pot_invest.forEach((k,v) ->
-                            pot.players_curr_pot_invest.put(k,pot.players_curr_pot_invest.get(k) - v));
-            }
-            if (game_step == 0) {
-                ret = RoundResult();
-                ++SmallBlindIndex;
-            }
-            if(game_step > 1) {
-                massage_or_action = 1;
-            }
-        }
-        else if(massage_or_action == 2) {
-            ++in_hand_counter;
-        }
-
         return ret;
     }
 
@@ -227,6 +229,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.game_status = 200; // client read massage
             ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
             massage_or_action = 1;
+
         }
         curr_in_hand = pots.get(0).contributors.size();
         if (curr_in_hand == 1) {
@@ -444,8 +447,8 @@ public class TexasHoldemManger implements IGamesManager {
             AllIn,
             Check,
             Fold, //update contributors
-            Continue, //update contributors next_turn in case of leaving
-            Wait
+            Continue //update contributors next_turn in case of leaving
+//            Wait
         }
 
         void Do(ClientData player, int bet);
@@ -463,7 +466,7 @@ public class TexasHoldemManger implements IGamesManager {
                 case Check -> new CheckA();
                 case Fold -> new FoldA();
                 case Continue -> new ContinueA();
-                case Wait -> new Wait();
+//                case Wait -> new Wait();
             };
         }
     }
@@ -566,13 +569,6 @@ public class TexasHoldemManger implements IGamesManager {
                 pot.players_curr_pot_invest.remove(player.id);
             }
         }
-    }
-
-        public class Wait implements Action {
-            public void Do(ClientData player, int bet) {
-                MsgHeader next = new MsgHeader();
-                Next(next);
-            }
     }
 
     public class Hand {

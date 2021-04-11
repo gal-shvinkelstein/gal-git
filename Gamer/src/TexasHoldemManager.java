@@ -33,9 +33,8 @@ public class TexasHoldemManager implements IGamesClients {
             DisplayStatus(msg);
             System.out.println("your chip count: " + chips);
             my_turn.req_type = ReqType.Wait;
-//            if(m_round_step > 2) {
-//                my_turn.game_status = 200;
-//            }
+            my_turn.game_status = 200;
+
         }
         else  if (msg.game_status == 20)
         {
