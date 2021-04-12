@@ -8,6 +8,7 @@ public class ServerThread extends Thread {
     private ObjectInputStream m_is;
     private Socket m_s = null;
     private Dispatcher m_disp;
+    private int m_id;
     OperateServer.AllClients m_clients_data;
 
     public ServerThread(Socket s, OperateServer.AllClients data)
@@ -32,6 +33,7 @@ public class ServerThread extends Thread {
         {
             MsgHeader msg;
             msg = (MsgHeader) m_is.readObject();
+            m_id = msg.usr_Id;
             m_disp.RequestHandler(msg);
         }
     } catch (IOException e) {
@@ -45,7 +47,7 @@ public class ServerThread extends Thread {
     }
     finally{
     try{
-        System.out.println("Connection Closing..");
+        System.out.println("Connection Closing.." + m_id);
         if (m_is!=null){
             m_is.close();
             System.out.println(" Socket Input Stream Closed");

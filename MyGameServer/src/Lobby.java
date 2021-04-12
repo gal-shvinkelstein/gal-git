@@ -119,7 +119,7 @@ public class Lobby
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
         //check results
-        if(ret.game_status != 2 && ret.game_status != 200 && ret.req_type != ReqType.Wait) {
+        if(ret.game_status != 2 && ret.game_status != 200) {
             if(m_active_players.size() < 2)
             {
                 ret.game_status = 2000;
@@ -127,30 +127,35 @@ public class Lobby
             System.out.println(" next turn id: " + ret.usr_Id);
             m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
         }
-        else if(ret.req_type != ReqType.Wait)
+        else
         {
-            HashMap<Integer, ClientData> broadcast = m_active_game.GetForBroadcast();
-            MsgHeader finalRet = ret;
-            broadcast.forEach((k, v) -> {
-                try {
-                    v.client_disp.ReplayHandler(finalRet);
-                    System.out.println("sending broadcast to: " + v.id + " status: " + finalRet.game_status + " game step: " + GetGameStep());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            boolean status = true;
+            while(status) {
+                HashMap<Integer, ClientData> broadcast = m_active_game.GetForBroadcast();
+                MsgHeader finalRet = ret;
+                broadcast.forEach((k, v) -> {
+                    try {
+                        v.client_disp.ReplayHandler(finalRet);
+                        System.out.println("sending broadcast to: " + v.id + " status: " + finalRet.game_status + " game step: " + GetGameStep());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                status = false;
+                if (ret.game_status == 200) {
+                    System.out.println("after broadcast");
+                    ret = m_active_game.Next(ret);
+                    if(ret.game_status != 200) {
+                        m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
+                    }
+                    else {
+                        status = true;
+                    }
                 }
-            });
-            if (ret.game_status == 200)
-            {
-                System.out.println("after broadcast");
-                ret = m_active_game.Next(ret);
-                m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
             }
 
         }
-        else
-        {
-            System.out.println(ret.usr_Id + " its not your turn");
-        }
+
     }
     public int GetGameStep()
     {

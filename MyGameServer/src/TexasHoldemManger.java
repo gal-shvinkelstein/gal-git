@@ -67,7 +67,7 @@ public class TexasHoldemManger implements IGamesManager {
         ret.usr_Id = next_turn.get(player_turn_index).id;
         System.out.println("next id : "+ ret.usr_Id);
 
-        if(game_step < 2 || last_move.usr_Id == next_turn.get(player_turn_index).id || massage_or_action == 2)
+        if(true)//game_step < 2 || last_move.usr_Id == next_turn.get(player_turn_index).id || massage_or_action == 2)
         {
             System.out.println("Go Ahead: " + next_turn.get(player_turn_index).id);
             if (game_step == 0) // dealing cards
@@ -127,7 +127,9 @@ public class TexasHoldemManger implements IGamesManager {
                 System.out.println("game step: " + game_step);
                 if ((curr_in_hand - all_in_counter) > 1) {
                     System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
+                    massage_or_action = 1;
                     ret = BettingRound(last_move);
+                    massage_or_action = 2;
                 } else if (game_step == 7) {
                     System.out.println("calculate results");
                     ret = RoundResult();
@@ -160,10 +162,11 @@ public class TexasHoldemManger implements IGamesManager {
                 ++in_hand_counter;
             }
         }
-        else {
-            ret.req_type = ReqType.Wait;
-            player_turn_index = (player_turn_index + 1) % next_turn.size();
-        }
+//        else {
+//            ret.req_type = ReqType.Wait;
+//            player_turn_index = (player_turn_index + 1) % next_turn.size();
+//            ret.game_status = 1000;
+//        }
         return ret;
     }
 
@@ -217,7 +220,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.usr_Id = next_turn.get(player_turn_index).id;
             massage_or_action = 2;
 //            ++in_hand_counter;
-            player_turn_index = (player_turn_index + 1) % next_turn.size();
+//            player_turn_index = (player_turn_index + 1) % next_turn.size();
         } else {
             //check last move action + update pot data
             System.out.println("preparing for broadcast update");
@@ -229,6 +232,8 @@ public class TexasHoldemManger implements IGamesManager {
             ret.game_status = 200; // client read massage
             ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
             massage_or_action = 1;
+            player_turn_index = (player_turn_index + 1) % next_turn.size();
+
 
         }
         curr_in_hand = pots.get(0).contributors.size();
