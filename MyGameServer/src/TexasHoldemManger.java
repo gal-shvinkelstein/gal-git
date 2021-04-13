@@ -122,15 +122,14 @@ public class TexasHoldemManger implements IGamesManager {
                 ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
                 ret.game_status = 200;
                 game_step++;
-            } else if (game_step == 3 || game_step == 5 || game_step == 7) // bet round after cards open
+            } else if (game_step == 3 || game_step == 5 || game_step == 7 || game_step == 8) // bet round after cards open
             {
                 System.out.println("game step: " + game_step);
-                if ((curr_in_hand - all_in_counter) > 1) {
+                if ((curr_in_hand - all_in_counter) > 1 && game_step != 8) {
                     System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
-                    massage_or_action = 1;
+                    pots.forEach(Pot::StartNewBetRound);
                     ret = BettingRound(last_move);
-                    massage_or_action = 2;
-                } else if (game_step == 7) {
+                } else if (game_step == 8) {
                     System.out.println("calculate results");
                     ret = RoundResult();
                 } else {
@@ -142,7 +141,7 @@ public class TexasHoldemManger implements IGamesManager {
             {
                 ret = DealOneToBoard();
             }
-            if (in_hand_counter == curr_in_hand) {
+            if ((in_hand_counter == curr_in_hand) && massage_or_action != 2) {
                 game_step = (game_step + 1) % NumOfGameSteps;
                 System.out.println("to next step: " + game_step);
                 in_hand_counter = 0;
@@ -155,18 +154,13 @@ public class TexasHoldemManger implements IGamesManager {
                     ret = RoundResult();
                     ++SmallBlindIndex;
                 }
-                if (game_step > 1) {
-                    massage_or_action = 1;
-                }
-            } else if (massage_or_action == 2) {
-                ++in_hand_counter;
+//                if (game_step > 1) {
+//                    massage_or_action = 1;
+//                }
             }
+
         }
-//        else {
-//            ret.req_type = ReqType.Wait;
-//            player_turn_index = (player_turn_index + 1) % next_turn.size();
-//            ret.game_status = 1000;
-//        }
+
         return ret;
     }
 
@@ -219,8 +213,8 @@ public class TexasHoldemManger implements IGamesManager {
             ret.quantity_param = curr_bet;
             ret.usr_Id = next_turn.get(player_turn_index).id;
             massage_or_action = 2;
-//            ++in_hand_counter;
-//            player_turn_index = (player_turn_index + 1) % next_turn.size();
+            ++in_hand_counter;
+            player_turn_index = (player_turn_index + 1) % next_turn.size();
         } else {
             //check last move action + update pot data
             System.out.println("preparing for broadcast update");
@@ -232,7 +226,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.game_status = 200; // client read massage
             ret.game_manger_msg = pots.stream().map(Object::toString).collect(Collectors.joining(", "));
             massage_or_action = 1;
-            player_turn_index = (player_turn_index + 1) % next_turn.size();
+//            player_turn_index = (player_turn_index + 1) % next_turn.size();
 
 
         }
@@ -264,39 +258,45 @@ public class TexasHoldemManger implements IGamesManager {
         for (Pot pot : pots) {
             total_pot += pot.GetPotVal();
         }
-
+        System.out.println ("checking total pot: " + total_pot);
         if (curr_in_hand > 1) {
             pots.get(0).contributors.forEach((k) -> players_hand.get(k.id).addCards(board));
+            System.out.println ("adjusting player hands");
             ret.usr_Id = 0;
             HashMap<Integer,Integer> winners = new HashMap<>();
             Vector<Integer> tmp_winners = new Vector<>();
             int max_val = 0;
             for (Pot pot : pots) {
-               for(ClientData clientData : pot.contributors) {
-                   HandEvaluator handEvaluator = new HandEvaluator(players_hand.get(clientData.id));
-                   if(max_val < handEvaluator.value)
-                   {
-                       tmp_winners.clear();
-                       tmp_winners.add(clientData.id);
-                       max_val = handEvaluator.value;
-                   }
-                   else if(max_val == handEvaluator.value)
-                   {
-                       tmp_winners.add(clientData.id);
-                   }
-               }
-               int pot_share = pot.pot_val / tmp_winners.size();
-               for (int i : tmp_winners)
-               {
-                   if(winners.containsKey(i))
-                   {
-                       winners.put(i,winners.get(i) + pot_share);
-                   }
-                   else
-                   {
-                       winners.put(i,pot_share);
-                   }
-               }
+                System.out.println ("looking for the winner in each pot");
+                for(ClientData clientData : pot.contributors) {
+                    HandEvaluator handEvaluator = new HandEvaluator(players_hand.get(clientData.id));
+                    System.out.println ("evaluate: " + clientData.id);
+                    if(max_val < handEvaluator.value)
+                    {
+                        System.out.println ("update the new winner");
+                        tmp_winners.clear();
+                        tmp_winners.add(clientData.id);
+                        max_val = handEvaluator.value;
+                    }
+                    else if(max_val == handEvaluator.value)
+                    {
+                        System.out.println ("pot tie");
+                        tmp_winners.add(clientData.id);
+                    }
+                }
+                int pot_share = pot.pot_val / tmp_winners.size();
+                for (int i : tmp_winners)
+                {
+                    System.out.println ("update final winners");
+                    if(winners.containsKey(i))
+                    {
+                        winners.put(i,winners.get(i) + pot_share);
+                    }
+                    else
+                    {
+                        winners.put(i,pot_share);
+                    }
+                }
             }
             ret.buffer = winners;
             //send display of the winnings hand
@@ -308,7 +308,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.quantity_param = total_pot;
         }
 
-
+        System.out.println ("finish calculating");
         return ret;
     }
 
@@ -339,7 +339,7 @@ public class TexasHoldemManger implements IGamesManager {
         System.out.println("in add after adding");
     }
 
-    private final int NumOfGameSteps = 7;
+    private final int NumOfGameSteps = 9;
     private final int SmallBlind = 5;
     private int SmallBlindIndex;
     private int game_step;
@@ -370,6 +370,11 @@ public class TexasHoldemManger implements IGamesManager {
             pot_val = 0;
             contributors.clear();
             players_curr_pot_invest.clear();
+        }
+
+        public void StartNewBetRound()
+        {
+            this.curr_bet = 0;
         }
 
         public void addContributor(ClientData player) {

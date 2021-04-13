@@ -119,7 +119,7 @@ public class Lobby
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
         //check results
-        if(ret.game_status != 2 && ret.game_status != 200) {
+        if(ret.game_status != 2 && ret.game_status != 200 && ret.game_status != 20) {
             if(m_active_players.size() < 2)
             {
                 ret.game_status = 2000;
@@ -142,7 +142,7 @@ public class Lobby
                     }
                 });
                 status = false;
-                if (ret.game_status == 200) {
+                if (ret.game_status == 200 || ret.game_status == 20) {
                     System.out.println("after broadcast");
                     ret = m_active_game.Next(ret);
                     if(ret.game_status != 200) {

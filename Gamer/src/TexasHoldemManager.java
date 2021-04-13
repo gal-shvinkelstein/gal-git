@@ -104,9 +104,8 @@ public class TexasHoldemManager implements IGamesClients {
                 ++m_round_step;
             }
         }
-//        if(msg.game_status != 200) {
-            my_turn.req_type = ReqType.PlayNext;
-//        }
+        my_turn.req_type = ReqType.PlayNext;
+
         my_turn.usr_Id = m_id;
         return my_turn;
     }
