@@ -118,6 +118,7 @@ public class Lobby
 
         MsgHeader ret;
         ret = m_active_game.Next(last_turn);
+        System.out.println ("after next from lobby");
         //check results
         if(ret.game_status != 2 && ret.game_status != 200 && ret.game_status != 20) {
             if(m_active_players.size() < 2)

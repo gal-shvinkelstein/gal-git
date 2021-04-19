@@ -132,6 +132,7 @@ public class TexasHoldemManger implements IGamesManager {
                 } else if (game_step == 8) {
                     System.out.println("calculate results");
                     ret = RoundResult();
+
                 } else {
                     System.out.println("open cards!");
                     ++game_step;
@@ -150,17 +151,10 @@ public class TexasHoldemManger implements IGamesManager {
                     pot.players_curr_pot_invest.forEach((k, v) ->
                             pot.players_curr_pot_invest.put(k, pot.players_curr_pot_invest.get(k) - v));
                 }
-                if (game_step == 0) {
-                    ret = RoundResult();
-                    ++SmallBlindIndex;
-                }
-//                if (game_step > 1) {
-//                    massage_or_action = 1;
-//                }
+
             }
-
         }
-
+        System.out.println ("sending ret to lobby");
         return ret;
     }
 
@@ -298,7 +292,9 @@ public class TexasHoldemManger implements IGamesManager {
                     }
                 }
             }
+            ret.buffer = new HashMap<>();
             ret.buffer = winners;
+            System.out.println ("the winner is: " + winners.toString ());
             //send display of the winnings hand
         } else {
             Optional<ClientData> winner = pots.get(0).contributors.stream().findAny();
