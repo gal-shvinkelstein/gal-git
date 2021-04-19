@@ -334,8 +334,8 @@ public class Gamer
                 System.out.println("2");
                 next.usr_Id = m_id;
                 next.lobby_id = curr_lobby;
-                if(ret.game_status != 200)// && next.game_status != 20) {
-                {
+                if(ret.game_status != 200 && next.game_status != 20) {
+
                     System.out.println("Action sent");
                     m_os.writeObject(next);
                 }

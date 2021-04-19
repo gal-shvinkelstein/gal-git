@@ -146,7 +146,7 @@ public class Lobby
                 if (ret.game_status == 200 || ret.game_status == 20) {
                     System.out.println("after broadcast");
                     ret = m_active_game.Next(ret);
-                    if(ret.game_status != 200) {
+                    if(ret.game_status != 200 && ret.game_status != 20) {
                         m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
                     }
                     else {

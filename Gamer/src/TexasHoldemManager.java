@@ -41,7 +41,7 @@ public class TexasHoldemManager implements IGamesClients {
             DisplayResults(msg);
             in_round_status = 1;
             System.out.println("your chip count: " + chips);
-//            my_turn.game_status = 20;
+            my_turn.game_status = 20;
         }
         else if(msg.game_status == 300) {
             System.out.println("please choose your action, ");
