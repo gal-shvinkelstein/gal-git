@@ -26,6 +26,7 @@ public class TexasHoldemManager implements IGamesClients {
         {
             chips -= msg.quantity_param;
             System.out.println("your chip count: " + chips);
+            my_turn.quantity_param = msg.quantity_param;
             ++m_round_step;
         }
         else if(msg.game_status == 200)
@@ -124,7 +125,7 @@ public class TexasHoldemManager implements IGamesClients {
             System.out.println ("You win the hand");
             chips += msg.quantity_param;
         }
-        else
+        else if(msg.usr_Id == 0)
         {
             System.out.println ("Checking for winnings");
             HashMap<Integer,Integer> round_winners;
@@ -134,6 +135,9 @@ public class TexasHoldemManager implements IGamesClients {
                 chips += round_winners.get(m_id);
                 System.out.println ("you won: " + round_winners.get(m_id));
             }
+        }
+        else{
+            System.out.println ("the winner is: " + msg.usr_Id);
         }
         System.out.println("your update chips count is: " + chips);
 

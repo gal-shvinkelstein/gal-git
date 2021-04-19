@@ -248,7 +248,7 @@ public class TexasHoldemManger implements IGamesManager {
     {
         MsgHeader ret = new MsgHeader();
         game_step = -1;
-        SmallBlindIndex = (SmallBlind + 1) % next_turn.size ();
+        SmallBlindIndex = (SmallBlindIndex + 1) % next_turn.size ();
         in_hand_counter = 0;
         ret.game_status = 20;
         int total_pot = 0;
@@ -398,7 +398,7 @@ public class TexasHoldemManger implements IGamesManager {
             System.out.println("in  pot add before adding, player invest: " + players_curr_pot_invest.get(id));
             players_curr_pot_invest.computeIfPresent(id, (k, v) -> v + bet);
             System.out.println("in  pot add after adding , player invest: " + players_curr_pot_invest.get(id));
-            pot_val += bet;
+            this.pot_val += bet;
         }
 
 
@@ -504,7 +504,7 @@ public class TexasHoldemManger implements IGamesManager {
     public class BetA implements Action {
         public void Do(ClientData player, int bet) {
             int gap = CalculateCallGap(player,bet);
-            AddBetToPot(player.id,gap,pots.size() -1);
+            AddBetToPot(player.id,bet,pots.size() -1);
             pots.get(pots.size()-1).curr_bet += gap;
             in_hand_counter = 1;
         }
