@@ -15,7 +15,7 @@ public class TexasHoldemManger implements IGamesManager {
 
         joined_num = 1;
         player_turn_index = 0;
-        game_step = 0;
+        game_step = -1;
         in_hand_counter = 0;
         curr_in_hand = 1;
         massage_or_action = 0;
@@ -63,17 +63,17 @@ public class TexasHoldemManger implements IGamesManager {
     public MsgHeader Next(MsgHeader last_move) {
         MsgHeader ret = new MsgHeader();
         ret.req_type = ReqType.PlayNext;
-        System.out.println("next");
         ret.usr_Id = next_turn.get(player_turn_index).id;
-        System.out.println("next id : "+ ret.usr_Id);
 
-        if(true)//game_step < 2 || last_move.usr_Id == next_turn.get(player_turn_index).id || massage_or_action == 2)
+        if(true)
         {
-            System.out.println("Go Ahead: " + next_turn.get(player_turn_index).id);
-            if (game_step == 0) // dealing cards
+            if (game_step < 1) // dealing cards
             {
-                StartNewRound();
-                System.out.println("start new round");
+                if (game_step == -1) {
+                    StartNewRound ();
+                    ret.usr_Id = next_turn.get(player_turn_index).id;
+                    System.out.println("start new round");
+                }
                 List<Card> next = DealNextHand();
                 System.out.println("deal hand");
 
@@ -161,6 +161,8 @@ public class TexasHoldemManger implements IGamesManager {
     private void StartNewRound() {
         player_turn_index = SmallBlindIndex;
         pots.clear();
+        board.clear ();
+        massage_or_action = 0;
         Pot pot = new Pot(SmallBlind * 2);
         int counter = next_turn.size();
         curr_in_hand = counter;
@@ -183,6 +185,7 @@ public class TexasHoldemManger implements IGamesManager {
         pots.add(pot);
         game_deck.reset();
         game_deck.shuffle();
+        game_step = 0;
     }
 
     private List<Card> DealNextHand() {
@@ -244,8 +247,8 @@ public class TexasHoldemManger implements IGamesManager {
     private MsgHeader RoundResult() //refer to round results
     {
         MsgHeader ret = new MsgHeader();
-        game_step = 0;
-        ++SmallBlindIndex;
+        game_step = -1;
+        SmallBlindIndex = (SmallBlind + 1) % next_turn.size ();
         in_hand_counter = 0;
         ret.game_status = 20;
         int total_pot = 0;

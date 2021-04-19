@@ -126,12 +126,13 @@ public class TexasHoldemManager implements IGamesClients {
         }
         else
         {
-            System.out.println ("Split");
+            System.out.println ("Checking for winnings");
             HashMap<Integer,Integer> round_winners;
             round_winners = (HashMap<Integer, Integer>) msg.buffer;
             if (round_winners.get(m_id) != null)
             {
                 chips += round_winners.get(m_id);
+                System.out.println ("you won: " + round_winners.get(m_id));
             }
         }
         System.out.println("your update chips count is: " + chips);
