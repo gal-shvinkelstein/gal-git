@@ -122,12 +122,12 @@ public class TexasHoldemManger implements IGamesManager {
                 ret.game_manger_msg = "Flop: " + board.stream().map(Objects::toString).collect(Collectors.joining(", "));
                 ret.game_status = 200;
                 game_step++;
+                pots.forEach(Pot::StartNewBetRound);
             } else if (game_step == 3 || game_step == 5 || game_step == 7 || game_step == 8) // bet round after cards open
             {
                 System.out.println("game step: " + game_step);
                 if ((curr_in_hand - all_in_counter) > 1 && game_step != 8) {
                     System.out.println("starting betting round after card open, " + curr_in_hand + " in hand " + all_in_counter + " AllIn");
-                    pots.forEach(Pot::StartNewBetRound);
                     ret = BettingRound(last_move);
                 } else if (game_step == 8) {
                     System.out.println("calculate results");
@@ -136,11 +136,17 @@ public class TexasHoldemManger implements IGamesManager {
                 } else {
                     System.out.println("open cards!");
                     ++game_step;
+                    if(game_step == 6)
+                    {
+                        ret = RoundResult();
+                    }
+                    in_hand_counter = 0;
                 }
             }
             if (game_step == 4 || game_step == 6) // deal turn or river
             {
                 ret = DealOneToBoard();
+                pots.forEach(Pot::StartNewBetRound);
             }
             if ((in_hand_counter == curr_in_hand) && massage_or_action != 2) {
                 game_step = (game_step + 1) % NumOfGameSteps;
@@ -218,6 +224,7 @@ public class TexasHoldemManger implements IGamesManager {
             String type = (String) last_move.buffer;
             Action.Type last_action = Action.Type.valueOf(type);
             Action action = doActionFactory.GetAction(last_action);
+            System.out.println ("last move action is: " + type +" last move bet is: " + last_move.quantity_param);
             action.Do(m_active_players.get(last_move.usr_Id), last_move.quantity_param);
             //update all players
             ret.game_status = 200; // client read massage
