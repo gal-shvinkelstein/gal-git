@@ -10,7 +10,6 @@ public class TexasHoldemManager implements IGamesClients {
         chips = buy_in;
         m_id = id;
         in_round_status = 1;
-        m_round_step = 0;
     }
 
     @Override
@@ -20,14 +19,12 @@ public class TexasHoldemManager implements IGamesClients {
         {
             System.out.println("your cards is: " + msg.buffer.toString());
             System.out.println("your chip count: " + chips);
-            ++m_round_step;
         }
         else if(msg.game_status == 100)
         {
             chips -= msg.quantity_param;
             System.out.println("your chip count: " + chips);
             my_turn.quantity_param = msg.quantity_param;
-            ++m_round_step;
         }
         else if(msg.game_status == 200)
         {
@@ -45,65 +42,80 @@ public class TexasHoldemManager implements IGamesClients {
             my_turn.game_status = 20;
         }
         else if(msg.game_status == 300) {
-            System.out.println("please choose your action, ");
-            System.out.println(msg.game_manger_msg);
-            System.out.println("1 - call \n 2 - raise \n 3 - allin \n 4 - check \n 5 - fold \n 6 - cash out");
-            int choice = m_scanner.nextInt();
-            if (in_round_status == 1) {
-                switch (choice) {
-                    case 1:
-                        if (chips <= msg.quantity_param) {
-                            Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                            my_turn = action.Do(chips);
-                        } else {
-                            Action action = doActionFactory.GetAction(Action.Type.Call);
-                            my_turn = action.Do(msg.quantity_param);
-
-                            //chips -= msg.quantity_param;
-                        }
-                        break;
-                    case 2:
-                        if (chips <= msg.quantity_param) {
-                            System.out.println("you don't have enough chips to raise you are allin");
-                            Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                            my_turn = action.Do(chips);
-                        } else {
-                            System.out.println("insert your raise");
-                            int raise = m_scanner.nextInt();
-                            if (raise >= chips) {
-                                System.out.println("you are allin");
-                                Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                                my_turn = action.Do(chips);
+            boolean valid = true;
+            while (valid) {
+                System.out.println ("please choose your action, ");
+                System.out.println (msg.game_manger_msg);
+                System.out.println ("1 - call \n 2 - raise \n 3 - allin \n 4 - check \n 5 - fold \n 6 - cash out");
+                int choice = m_scanner.nextInt ();
+                if (in_round_status == 1) {
+                    switch (choice) {
+                        case 1:
+                            if (chips <= msg.quantity_param) {
+                                Action action = doActionFactory.GetAction (Action.Type.AllIn);
+                                my_turn = action.Do (chips);
                             } else {
-                                Action action = doActionFactory.GetAction(Action.Type.Bet);
-                                my_turn = action.Do(raise);
+                                Action action = doActionFactory.GetAction (Action.Type.Call);
+                                my_turn = action.Do (msg.quantity_param);
 
+                                //chips -= msg.quantity_param;
+                            }
+                            valid = false;
+                            break;
+                        case 2:
+                            if (chips <= msg.quantity_param) {
+                                System.out.println ("you don't have enough chips to raise you are allin");
+                                Action action = doActionFactory.GetAction (Action.Type.AllIn);
+                                my_turn = action.Do (chips);
+                            } else {
+                                System.out.println ("insert your raise");
+                                int raise = m_scanner.nextInt ();
+                                if (raise >= chips) {
+                                    System.out.println ("you are allin");
+                                    Action action = doActionFactory.GetAction (Action.Type.AllIn);
+                                    my_turn = action.Do (chips);
+                                } else {
+                                    Action action = doActionFactory.GetAction (Action.Type.Bet);
+                                    my_turn = action.Do (raise);
+                                }
+                            }
+                            valid = false;
+                            break;
+                        case 3: {
+                            Action action = doActionFactory.GetAction (Action.Type.AllIn);
+                            my_turn = action.Do (chips);
+                        }
+                        valid = false;
+                        break;
+                        case 4: {
+                            if (msg.quantity_param == 0) {
+                                Action action = doActionFactory.GetAction (Action.Type.Check);
+                                my_turn = action.Do (0);
+                                valid = false;
+                            } else {
+                                System.out.println ("you can't check there is a bet for the pot!");
                             }
                         }
                         break;
-                    case 3: {
-                        Action action = doActionFactory.GetAction(Action.Type.AllIn);
-                        my_turn = action.Do(chips);
+                        case 5: {
+                            Action action = doActionFactory.GetAction (Action.Type.Fold);
+                            my_turn = action.Do (0);
+                        }
+                        valid = false;
+                        break;
+                        case 6: {
+                            Action action = doActionFactory.GetAction (Action.Type.Continue);
+                            my_turn = action.Do (0);
+                            //todo: cash out method
+                        }
+                        valid = false;
+                        break;
                     }
-                    break;
-                    case 4: {
-                        Action action = doActionFactory.GetAction(Action.Type.Check);
-                        my_turn = action.Do(0);
-                    }
-                    break;
-                    case 5: {
-                        Action action = doActionFactory.GetAction(Action.Type.Fold);
-                        my_turn = action.Do(0);
-                    }
-                    break;
-                    case 6: {
-                        Action action = doActionFactory.GetAction(Action.Type.Continue);
-                        my_turn = action.Do(0);
-                        //todo: cash out method
-                    }
-                    break;
+
+                }else {
+                    System.out.println ("you can't bet in curr hand");
+                    valid = false;
                 }
-                ++m_round_step;
             }
         }
         my_turn.req_type = ReqType.PlayNext;
@@ -257,7 +269,6 @@ public class TexasHoldemManager implements IGamesClients {
     DoAction doActionFactory;
     private int m_id;
     public int in_round_status;
-    private int m_round_step;
 
     public enum HandValueType {
         ROYAL_FLUSH("a Royal Flush", 9),
