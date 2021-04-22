@@ -338,6 +338,11 @@ public class Gamer
 
                     System.out.println("Action sent");
                     m_os.writeObject(next);
+                }if(next.game_status == 2000) {
+                    status = false;
+                    // cash out...
+                    System.out.println("tnx for playing");
+
                 }
             }
         }

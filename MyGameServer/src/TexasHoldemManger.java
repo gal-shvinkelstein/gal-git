@@ -53,6 +53,10 @@ public class TexasHoldemManger implements IGamesManager {
             MsgHeader ret = new MsgHeader();
             ret.usr_Id = leaver.id;
             ret.req_type = ReqType.LeaveGame;
+            if(player_turn_index > next_turn.size () -1)
+            {
+                --player_turn_index;
+            }
             Next(ret);
         }
         --joined_num;
@@ -578,11 +582,13 @@ public class TexasHoldemManger implements IGamesManager {
 
     public class ContinueA implements Action {
         public void Do(ClientData player, int bet) {
+            // TODO: 22/04/2021 save founds or other cash out method 
             next_turn.remove(player);
             for (Pot pot : pots) {
                 pot.contributors.remove(player);
                 pot.players_curr_pot_invest.remove(player.id);
             }
+            LeaveGame (player);
         }
     }
 

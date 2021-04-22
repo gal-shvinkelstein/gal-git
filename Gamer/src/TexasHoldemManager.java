@@ -257,6 +257,7 @@ public class TexasHoldemManager implements IGamesClients {
             MsgHeader my_turn = new MsgHeader();
             my_turn.quantity_param = bet;
             my_turn.buffer = "Continue";
+            my_turn.game_status = 2000;
             in_round_status = 0;
             return my_turn;
         }
