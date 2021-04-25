@@ -143,7 +143,7 @@ public class Lobby
                     }
                 });
                 status = false;
-                if (ret.game_status == 200 || ret.game_status == 20) {
+                if (ret.game_status == 200 || ret.game_status == 20 || ret.game_status == 2000) {
                     System.out.println("after broadcast");
                     ret = m_active_game.Next(ret);
                     if(ret.game_status != 200 && ret.game_status != 20) {

@@ -50,14 +50,14 @@ public class TexasHoldemManger implements IGamesManager {
     public void LeaveGame(ClientData leaver) {
         //cash out...
         if (game_step != 0) {
-            MsgHeader ret = new MsgHeader();
-            ret.usr_Id = leaver.id;
-            ret.req_type = ReqType.LeaveGame;
+//            MsgHeader ret = new MsgHeader();
+//            ret.usr_Id = leaver.id;
+//            ret.req_type = ReqType.LeaveGame;
             if(player_turn_index > next_turn.size () -1)
             {
                 --player_turn_index;
             }
-            Next(ret);
+//            Next(ret);
         }
         --joined_num;
         m_active_players.remove(leaver.id);
@@ -69,7 +69,7 @@ public class TexasHoldemManger implements IGamesManager {
         ret.req_type = ReqType.PlayNext;
         ret.usr_Id = next_turn.get(player_turn_index).id;
 
-        if(true)
+        if(m_active_players.size () > 1)
         {
             if (game_step < 1) // dealing cards
             {
@@ -163,6 +163,9 @@ public class TexasHoldemManger implements IGamesManager {
                 }
 
             }
+        }else
+        {
+            ret.game_status = 2000;
         }
         System.out.println ("sending ret to lobby");
         return ret;
