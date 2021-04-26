@@ -92,7 +92,7 @@ public class Lobby
             }
             else
             {
-                ret.buffer = "player joined - wait for more participants";
+                ret.buffer = "player joined - wait for more participants or to next hand";
                 ret.game_status = 0;
                 log_c.client_disp.ReplayHandler(ret);
             }

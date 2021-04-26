@@ -33,12 +33,20 @@ public class TexasHoldemManger implements IGamesManager {
     @Override
     public boolean JoinGame(ClientData joiner) {
         joiner.curr_game_score = 2500;
-        joiner.curr_status = 1;
+        boolean status;
+        if(game_step == -1) {
+            joiner.curr_status = 1;
+            next_turn.add(joiner);
+            status = true;
+        }
+        else
+        {
+            joiner.curr_status = 0;
+            status = false;
+        }
         m_active_players.put(joiner.id, joiner);
-//        next_turn.set(joined_num++, joiner);
-        next_turn.add(joiner);
         joined_num++;
-        return true;
+        return status;
     }
 
     @Override
@@ -176,6 +184,16 @@ public class TexasHoldemManger implements IGamesManager {
         pots.clear();
         board.clear ();
         massage_or_action = 0;
+
+        for (ClientData clientData : m_active_players.values ())
+        {
+            if(clientData.curr_status == 0)
+            {
+                m_active_players.get (clientData.id).curr_status = 1;
+                next_turn.add (clientData);
+            }
+        }
+
         Pot pot = new Pot(SmallBlind * 2);
         int counter = next_turn.size();
         curr_in_hand = counter;
@@ -185,7 +203,7 @@ public class TexasHoldemManger implements IGamesManager {
             pot.contributors.add(next_turn.get(i));
             System.out.println("new round, adding: " + next_turn.get(i).id);
             pot.players_curr_pot_invest.put(next_turn.get(i).id,0);
-            System.out.println("added");
+
         }
         i = 0;
         while (counter != 0) {
@@ -310,6 +328,7 @@ public class TexasHoldemManger implements IGamesManager {
             ret.buffer = new HashMap<>();
             ret.buffer = winners;
             System.out.println ("the winner is: " + winners.toString ());
+            ret.game_manger_msg = " pot value is: " + total_pot + " ,analyze hand results";
             //send display of the winnings hand
         } else {
             Optional<ClientData> winner = pots.get(0).contributors.stream().findAny();
