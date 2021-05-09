@@ -2,6 +2,10 @@ package my_game_lobby.server_spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,7 +13,11 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-@SpringBootApplication
+
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@ComponentScan({"my_game_lobby.server_spring.BackupClientList"})
+@EntityScan("my_game_lobby.server_spring.ClientData")
+@EnableJpaRepositories("my_game_lobby.server_spring.clientRep")
 public class ServerSpringApplication {
 
 	public static class AllClients {
@@ -31,7 +39,7 @@ public class ServerSpringApplication {
 			return m_lob_list;
 		}
 
-		public void AddClient(ClientData cd) throws IOException, ClassNotFoundException {
+		public void AddClient(ClientData cd){
 			System.out.println("trying to write new gamer in add func");
 
 			m_client_list.put(cd.id, cd);
@@ -41,11 +49,11 @@ public class ServerSpringApplication {
 		}
 
 
-		public AllClients() throws IOException, ClassNotFoundException {
+		public AllClients(){
 
 			my_backup = new BackupClientList();
 			m_client_list = new HashMap<>();
-			// ToDo: load m_clients_list from backup file
+
 			m_client_list = my_backup.LoadBackup();
 
 			m_lob_list = new HashMap<>();
@@ -53,7 +61,7 @@ public class ServerSpringApplication {
 
 		}
 	}
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
+	public static void main(String[] args){
 		SpringApplication.run(ServerSpringApplication.class, args);
 		Socket s = null;
 		ServerSocket login = null;

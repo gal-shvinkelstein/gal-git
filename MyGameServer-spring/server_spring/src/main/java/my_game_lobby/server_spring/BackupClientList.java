@@ -3,39 +3,46 @@ package my_game_lobby.server_spring;
 import java.io.*;
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+@Service
+@Controller
+@RequestMapping(path="/demo")
 public class BackupClientList implements Serializable{
-    public BackupClientList() throws IOException, ClassNotFoundException {
-        FileOutputStream f = new FileOutputStream("client_backup.ser", true);
-        m_o = new ObjectOutputStream(f);
-        FileInputStream fi = new FileInputStream("client_backup.ser");
-        m_i = new ObjectInputStream(fi);
-        my_backup_data = new HashMap<>();
-        HashMap<Integer, ClientData> to_copy1;
-        to_copy1 = (HashMap<Integer, ClientData>) m_i.readObject();
-        if (to_copy1 != null) {
-            System.out.println("upload backup succeed");
-            my_backup_data = to_copy1;
-        }
-        else {
-            System.out.println("upload backup failed");
-        }
+    @Autowired
+    public clientRep repository;
 
+    @PostMapping(path="/add")
+    public void DoBackup(@RequestParam ClientData cd){
+        repository.save (cd);
     }
-    public void DoBackup(ClientData cd) throws IOException, ClassNotFoundException {
-        my_backup_data.put(cd.id,cd);
-        m_o.writeObject(my_backup_data);
 
+    @Transactional
+    public void UpdatePurchase(Integer id, Games new_game){
+        repository.findAllById (id).map(target -> {
+            ClientData clientData = (ClientData) target;
+            clientData.AddGame (new_game);
+            return target;
+        });
     }
-    public void UpdatePurchase(int id, Games new_game) throws IOException, ClassNotFoundException {
-        my_backup_data.get(id).my_games.add(new_game);
-        m_o.writeObject(my_backup_data);
-    }
+
+    @GetMapping(path="/all")
     public HashMap<Integer, ClientData> LoadBackup()
     {
-        return my_backup_data;
+        Iterable<ClientData> all_backup = repository.findAll ();
+        HashMap<Integer, ClientData> ret_backup = new HashMap<> ();
+        all_backup.forEach (target -> ret_backup.put (target.id, target));
+        System.out.println ("Data loaded");
+        return ret_backup;
     }
 
-    private HashMap<Integer, ClientData> my_backup_data;
-    private final ObjectOutputStream m_o;
-    private ObjectInputStream m_i;
+
 }
