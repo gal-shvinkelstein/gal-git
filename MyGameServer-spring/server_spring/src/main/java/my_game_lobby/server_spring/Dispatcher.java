@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Dispatcher
 {
-    public Dispatcher(ObjectOutputStream os, ServerSpringApplication.AllClients clients_data)
+    public Dispatcher(ObjectOutputStream os, CommandLineAppStartupRunner.AllClients clients_data)
     {
         m_os = os;
         m_log_req = new LoginServer(this);
@@ -173,5 +173,5 @@ public class Dispatcher
 
     public Map<ReqType, Runnable> m_commands;
 
-    public ServerSpringApplication.AllClients m_client_data;
+    public CommandLineAppStartupRunner.AllClients m_client_data;
 }

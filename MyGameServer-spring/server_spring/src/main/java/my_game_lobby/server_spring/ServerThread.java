@@ -10,9 +10,9 @@ public class ServerThread extends Thread{
     private Socket m_s = null;
     private Dispatcher m_disp;
     private int m_id;
-    ServerSpringApplication.AllClients m_clients_data;
+    CommandLineAppStartupRunner.AllClients m_clients_data;
 
-    public ServerThread(Socket s, ServerSpringApplication.AllClients data)
+    public ServerThread(Socket s, CommandLineAppStartupRunner.AllClients data)
     {
         this.m_s = s;
         m_clients_data = data;
