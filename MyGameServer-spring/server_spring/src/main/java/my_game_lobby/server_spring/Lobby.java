@@ -1,10 +1,17 @@
 package my_game_lobby.server_spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.util.HashMap;
 
 public class Lobby
 {
+    HashMap<Integer, ClientData > m_active_players;
+    private IGamesManager m_active_game;
+    @Autowired
+    CommandLineAppStartupRunner all_clients;
+
     public Lobby(ClientData opener)
     {
         m_active_players = new HashMap<>();
@@ -60,7 +67,7 @@ public class Lobby
             System.out.println("client doesn't have this game");
             ret.buffer = "you should buy the game first";
         }
-        log_c.client_disp.ReplayHandler(ret);
+        all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
         System.out.println("Reply sent");
 
     }
@@ -78,7 +85,7 @@ public class Lobby
         {
             ret.buffer = "game was not created";
             ret.game_status = 100;
-            log_c.client_disp.ReplayHandler(ret);
+            all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
         }
         else if(m_active_game.GetCurrActiveNumOfPlayers() < m_active_game.GetMaxPlayers()) {
 
@@ -89,21 +96,21 @@ public class Lobby
                 ret.buffer = "player joined - wait to your turn";
                 ret.game_status = 1;
                 ret.usr_Id = joiner.usr_Id;
-                log_c.client_disp.ReplayHandler(ret);
+                all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
                 Next(ret);
             }
             else
             {
                 ret.buffer = "player joined - wait for more participants or to next hand";
                 ret.game_status = 0;
-                log_c.client_disp.ReplayHandler(ret);
+                all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
             }
         }
         else
         {
             ret.buffer = "game is full";
             ret.game_status = 100;
-            log_c.client_disp.ReplayHandler(ret);
+            all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
         }
 
     }
@@ -112,7 +119,7 @@ public class Lobby
         ClientData log_c = m_active_players.get(leaver.usr_Id);
         m_active_game.LeaveGame(log_c);
         ret.buffer = "tnx for playing";
-        log_c.client_disp.ReplayHandler(ret);
+        all_clients.GetDispatcher (log_c.id).ReplayHandler (ret);
     }
 
     public void Next(MsgHeader last_turn) throws IOException {
@@ -128,7 +135,7 @@ public class Lobby
                 ret.game_status = 2000;
             }
             System.out.println(" next turn id: " + ret.usr_Id);
-            m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
+            all_clients.GetDispatcher (m_active_players.get(ret.usr_Id).id).ReplayHandler (ret);
         }
         else
         {
@@ -138,7 +145,7 @@ public class Lobby
                 MsgHeader finalRet = ret;
                 broadcast.forEach((k, v) -> {
                     try {
-                        v.client_disp.ReplayHandler(finalRet);
+                        all_clients.GetDispatcher(v.id).ReplayHandler (finalRet);
                         System.out.println("sending broadcast to: " + v.id + " status: " + finalRet.game_status + " game step: " + GetGameStep());
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -149,7 +156,7 @@ public class Lobby
                     System.out.println("after broadcast");
                     ret = m_active_game.Next(ret);
                     if(ret.game_status != 200 && ret.game_status != 20) {
-                        m_active_players.get(ret.usr_Id).client_disp.ReplayHandler(ret);
+                        all_clients.GetDispatcher (m_active_players.get(ret.usr_Id).id).ReplayHandler (ret);
                     }
                     else {
                         status = true;
@@ -165,6 +172,5 @@ public class Lobby
         return  m_active_game.GetGameStep();
     }
 
-    HashMap<Integer, ClientData > m_active_players;
-    private IGamesManager m_active_game;
+
 }

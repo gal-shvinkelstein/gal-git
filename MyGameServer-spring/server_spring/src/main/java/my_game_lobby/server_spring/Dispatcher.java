@@ -118,7 +118,6 @@ public class Dispatcher
     }
     public void CreateLobby (ClientData opener) throws IOException {
         //open new lobby
-        opener.client_disp = this;
         Lobby new_lobby = new Lobby(opener);
         int lobby_id = m_client_data.GetNewLobbyId();
         m_client_data.GetLobList().put(lobby_id,new_lobby);
@@ -130,7 +129,6 @@ public class Dispatcher
     }
 
     public void JoinLobby (ClientData joiner, int lobby_id) throws IOException {
-        joiner.client_disp = this;
         joiner.curr_lobby_id = lobby_id;
         m_client_data.GetLobList().get(lobby_id).AddPlayerToLobby(joiner);
         MsgHeader msgHeader = new MsgHeader();

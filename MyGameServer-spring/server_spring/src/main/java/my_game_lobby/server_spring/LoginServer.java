@@ -1,10 +1,15 @@
 package my_game_lobby.server_spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
 
 public class LoginServer
 {
+    Dispatcher m_disp;
+    @Autowired
+    CommandLineAppStartupRunner all_clients;
+
     public LoginServer(Dispatcher disp)
     {
         m_disp = disp;
@@ -48,6 +53,7 @@ public class LoginServer
             ret.login_status = true;
             ret.buffer = log_c.my_games;
             log_c.log_status = true;
+            all_clients.LoginClient (log_c.id, m_disp);
         }
         m_disp.ReplayHandler(ret);
     }
@@ -57,7 +63,7 @@ public class LoginServer
         log_c.log_status = false;
         MsgHeader ret = new MsgHeader();
         ret.buffer = "logout";
-
+        all_clients.LogoutClient (log_c.id);
         m_disp.ReplayHandler(ret);
     }
 
@@ -82,6 +88,6 @@ public class LoginServer
         m_disp.ReplayHandler(ret);
     }
 
-    Dispatcher m_disp;
+
 
 }

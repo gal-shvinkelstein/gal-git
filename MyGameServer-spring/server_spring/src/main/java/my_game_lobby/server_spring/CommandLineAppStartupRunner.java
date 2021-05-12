@@ -15,6 +15,19 @@ import java.util.Map;
 public class CommandLineAppStartupRunner implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandLineAppStartupRunner.class);
+    private HashMap<Integer, Dispatcher> m_client_communication;
+    public void LoginClient(Integer id, Dispatcher dispatcher)
+    {
+        m_client_communication.put (id, dispatcher);
+    }
+    public void LogoutClient(Integer id)
+    {
+        m_client_communication.remove (id);
+    }
+    public Dispatcher GetDispatcher(Integer id)
+    {
+        return m_client_communication.get (id);
+    }
 
     public class AllClients {
         private Map<Integer, ClientData> m_client_list;
@@ -23,8 +36,15 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
         @Autowired
         public BackupClientList my_backup;
 
+        public AllClients() {
+            m_client_list = new HashMap<> ();
+            m_lob_list = new HashMap<> ();
+            m_client_communication = new HashMap<> ();
+            m_lobby_id = 0;
 
-        public int GetNewLobbyId() {         return ++m_lobby_id;
+        }
+        public int GetNewLobbyId() {
+            return ++m_lobby_id;
         }
 
         public Map<Integer, ClientData> GetClientList() {
@@ -40,15 +60,6 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
             m_client_list.put (cd.id, cd);
             my_backup.DoBackup (cd);
             System.out.println ("ok");
-
-        }
-
-
-        public AllClients() {
-            m_client_list = new HashMap<> ();
-            m_lob_list = new HashMap<> ();
-            m_lobby_id = 0;
-
         }
 
         public void DoBackup() {
@@ -63,6 +74,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
         logger.info ("Server Listening......");
         Socket s = null;
         ServerSocket login = null;
+        m_client_communication = new HashMap<> ();
         //ServerSocket lobby = null;
         CommandLineAppStartupRunner.AllClients clients_data = new CommandLineAppStartupRunner.AllClients ();
         clients_data.DoBackup ();

@@ -1,11 +1,11 @@
 package my_game_lobby.server_spring;
 
-import java.io.Serializable;
-import java.util.EnumSet;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.io.Serializable;
+import java.util.EnumSet;
 
 @Entity
 public class ClientData implements Serializable
@@ -29,7 +29,6 @@ public class ClientData implements Serializable
 
     //data for lobby server
     public int curr_lobby_id;
-    public Dispatcher client_disp;
     int curr_game_score;
     int curr_status;
 }
