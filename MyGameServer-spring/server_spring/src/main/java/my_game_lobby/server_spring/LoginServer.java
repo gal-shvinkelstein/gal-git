@@ -17,9 +17,7 @@ public class LoginServer
 
     public void RegisterNewGamer(MsgHeader msg) throws IOException, ClassNotFoundException {
         System.out.println("in register new gamer1");
-        ClientData new_gamer = new ClientData();
-        new_gamer.id = msg.usr_Id;
-        new_gamer.password = msg.usr_pass;
+        ClientData new_gamer = new ClientData(msg.usr_Id, msg.usr_pass);
         new_gamer.my_games.add(Games.XCircle);
         // add all free games
 

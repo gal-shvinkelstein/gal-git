@@ -1,10 +1,11 @@
 package my_game_lobby.server_spring;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -40,6 +41,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
             m_client_list = new HashMap<> ();
             m_lob_list = new HashMap<> ();
             m_client_communication = new HashMap<> ();
+//            my_backup = new BackupClientList ();
             m_lobby_id = 0;
 
         }
