@@ -1,19 +1,26 @@
 package my_game_lobby.server_spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-
 public class Dispatcher
 {
-    public Dispatcher(ObjectOutputStream os, CommandLineAppStartupRunner.AllClients clients_data)
+    private MsgHeader m_curr_msg;
+    private final ObjectOutputStream m_os;
+    private final LoginServer m_log_req;
+    public Map<ReqType, Runnable> m_commands;
+    @Autowired
+    AllClients m_client_data;
+
+    public Dispatcher(ObjectOutputStream os)
     {
         m_os = os;
         m_log_req = new LoginServer(this);
         m_commands = new HashMap<>();
         m_curr_msg = new MsgHeader();
-        m_client_data = clients_data;
 
         m_commands.put(ReqType.connection, () -> {
             try {
@@ -165,11 +172,6 @@ public class Dispatcher
         m_os.writeObject(msg);
     }
 
-    private MsgHeader m_curr_msg;
-    private final ObjectOutputStream m_os;
-    private final LoginServer m_log_req;
 
-    public Map<ReqType, Runnable> m_commands;
 
-    public CommandLineAppStartupRunner.AllClients m_client_data;
 }

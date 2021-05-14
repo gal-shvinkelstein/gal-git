@@ -10,7 +10,7 @@ public class Lobby
     HashMap<Integer, ClientData > m_active_players;
     private IGamesManager m_active_game;
     @Autowired
-    CommandLineAppStartupRunner all_clients;
+    AllClients all_clients;
 
     public Lobby(ClientData opener)
     {

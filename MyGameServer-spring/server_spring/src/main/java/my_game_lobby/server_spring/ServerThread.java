@@ -1,5 +1,7 @@
 package my_game_lobby.server_spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,12 +12,12 @@ public class ServerThread extends Thread{
     private Socket m_s = null;
     private Dispatcher m_disp;
     private int m_id;
-    CommandLineAppStartupRunner.AllClients m_clients_data;
+    @Autowired
+    AllClients m_clients_data;
 
-    public ServerThread(Socket s, CommandLineAppStartupRunner.AllClients data)
+    public ServerThread(Socket s)
     {
         this.m_s = s;
-        m_clients_data = data;
     }
 
     public void run()
@@ -28,7 +30,7 @@ public class ServerThread extends Thread{
             System.out.println("IO error in server thread");
         }
 
-        m_disp = new Dispatcher(m_os, m_clients_data);
+        m_disp = new Dispatcher(m_os);
         try {
             while(m_s.isConnected())
             {

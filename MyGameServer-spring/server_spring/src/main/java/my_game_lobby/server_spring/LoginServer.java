@@ -8,7 +8,7 @@ public class LoginServer
 {
     Dispatcher m_disp;
     @Autowired
-    CommandLineAppStartupRunner all_clients;
+    AllClients all_clients;
 
     public LoginServer(Dispatcher disp)
     {
@@ -85,7 +85,5 @@ public class LoginServer
         }
         m_disp.ReplayHandler(ret);
     }
-
-
 
 }
