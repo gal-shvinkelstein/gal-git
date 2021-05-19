@@ -6,10 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="MyGameServer-spring" />
         <module name="server_spring" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8">
+      <module name="MyGameServer-spring" target="15" />
       <module name="server_spring" target="14" />
     </bytecodeTargetLevel>
   </component>
