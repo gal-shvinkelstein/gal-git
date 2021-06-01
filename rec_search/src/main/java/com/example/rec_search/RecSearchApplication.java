@@ -25,14 +25,14 @@ public class RecSearchApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RecSearchApplication.class, args);
-		int[] arr = new int[1000];
+		int[] arr = new int[100000];
 		Random random = new Random ();
 
 		for (int i = 0; i < arr.length; ++i)
 		{
 			arr[i] = random.nextInt (1000000);
 		}
-		int x = arr[234];
+		int x = arr[2340];
 
 
 		ExecutorService pool = Executors.newFixedThreadPool(NUM_OF_THREADS);

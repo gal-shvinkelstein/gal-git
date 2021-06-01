@@ -20,7 +20,7 @@ public class RecSearch implements Runnable{
     }
 
 
-    public int SearchInPart(int arr[], int start, int end)
+    public int SearchInPart(int start, int end)
     {
         if (end < start || RecSearchApplication.getIndex_found ().get ()){
             // only for testing, to be able to identify if not founded or stopped
@@ -30,22 +30,22 @@ public class RecSearch implements Runnable{
             return -1;
         }
 
-        if (arr[start] == m_num_to_find) {
+        if (m_arr[start] == m_num_to_find) {
             RecSearchApplication.setIndex_found ();
             return start;
         }
 
-        if (arr[end] == m_num_to_find) {
+        if (m_arr[end] == m_num_to_find) {
             RecSearchApplication.setIndex_found ();
             return end;
         }
 
-        return SearchInPart(arr, start + 1, end - 1);
+        return SearchInPart(start + 1, end - 1);
     }
 
     public void run()
     {
-        int index = SearchInPart (m_arr,m_start,m_end);
+        int index = SearchInPart (m_start,m_end);
         log.info ("integer found at index: " + index);
 //        System.out.println (index);
     }
