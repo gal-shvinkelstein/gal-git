@@ -1,7 +1,7 @@
 # gal-git
 
 # The lobby projects
-# project breif:
+# project brief:
 
 
 
