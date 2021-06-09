@@ -14,7 +14,7 @@ lobby server provide the logic to manage the chosen game in runtime while the cl
 client implemantation:
 Gamer - currently used also for server testing
 
-#Project run instractions
+# Project run instractions:
 Currently implemanted only the Backend part of the project. 
 In order to run you should choose one of the two servers provided**
 1. For the first option run using your JVM
