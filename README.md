@@ -1,6 +1,6 @@
 # gal-git
 
-# The lobby projects
+# Friends online games lobby projects
 # Project brief:
 Main server that provide client registration and login services and allow to create a lobby for friends that provide multiplie choises of online games for group of friends to play together.
 lobby server provide the logic to manage the chosen game in runtime while the client implemantation provide the logic to play the same game
